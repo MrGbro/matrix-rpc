@@ -7,6 +7,8 @@ package io.homeey.nexa.common.exception;
  * @since 2025-12-23 23:53
  **/
 public class RpcException extends NexaException {
+    private static final long serialVersionUID = -2717824116620253609L;
+
     public RpcException() {
         super();
     }
