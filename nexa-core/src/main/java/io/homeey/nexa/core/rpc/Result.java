@@ -15,6 +15,13 @@ public class Result implements Serializable {
     private Object value;
     private Throwable exception;
 
+    public Result() {
+    }
+
+    public Result(Object value) {
+        this.value = value;
+    }
+
     public Object recreate() throws Throwable {
         if (exception != null) {
             throw exception;
