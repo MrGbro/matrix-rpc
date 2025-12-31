@@ -11,7 +11,14 @@
     <name>Matrix RPC Framework</name>
     <description>A lightweight, cloud-native, distributed RPC framework</description>
     <modules>
-        <module>matrix-common</module>
+        <module>matrix-rpc-core</module>
+        <module>matrix-rpc-common</module>
+        <module>matrix-rpc-protocol</module>
+        <module>matrix-rpc-transport</module>
+        <module>matrix-rpc-serialization</module>
+        <module>matrix-rpc-registry</module>
+        <module>matrix-rpc-cluster</module>
+        <module>matrix-rpc-spring-boot-starter</module>
     </modules>
 
     <properties>
@@ -41,6 +48,11 @@
     <dependencyManagement>
         <dependencies>
             <!--project dependency-->
+            <dependency>
+                <groupId>io.homeey</groupId>
+                <artifactId>matrix-rpc-core</artifactId>
+                <version>${revision}</version>
+            </dependency>
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-all</artifactId>
