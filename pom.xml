@@ -5,19 +5,13 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.homeey</groupId>
-    <artifactId>nexa</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <artifactId>matrix-rpc</artifactId>
+    <version>${revision}</version>
     <packaging>pom</packaging>
-    <name>NeXa RPC Framework</name>
+    <name>Matrix RPC Framework</name>
     <description>A lightweight, cloud-native, distributed RPC framework</description>
-
     <modules>
-        <module>nexa-common</module>
-        <module>nexa-core</module>
-        <module>nexa-serialization</module>
-        <module>nexa-registry</module>
-        <module>nexa-cluster</module>
-        <module>nexa-example</module>
+        <module>matrix-common</module>
     </modules>
 
     <properties>
@@ -38,22 +32,15 @@
 
         <junit.version>5.14.1</junit.version>
         <mockito.version>5.8.0</mockito.version>
+
+        <!--project version control-->
+        <maven_flatten_version>1.7.3</maven_flatten_version>
+        <revision>0.0.1</revision>
     </properties>
 
     <dependencyManagement>
         <dependencies>
             <!--project dependency-->
-            <dependency>
-                <groupId>io.homeey</groupId>
-                <artifactId>nexa-common</artifactId>
-                <version>${parent.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.homeey</groupId>
-                <artifactId>nexa-core</artifactId>
-                <version>${parent.version}</version>
-            </dependency>
-
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-all</artifactId>
@@ -105,5 +92,35 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>flatten-maven-plugin</artifactId>
+                <version>${maven_flatten_version}</version>
+                <configuration>
+                    <updatePomFile>true</updatePomFile>
+                    <flattenMode>oss</flattenMode>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>flatten</id>
+                        <goals>
+                            <goal>flatten</goal>
+                        </goals>
+                        <phase>process-resources</phase>
+                    </execution>
+                    <execution>
+                        <id>flatten.clean</id>
+                        <goals>
+                            <goal>clean</goal>
+                        </goals>
+                        <phase>clean</phase>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>
