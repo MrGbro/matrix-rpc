@@ -10,7 +10,7 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>matrix-rpc-core</artifactId>
+    <artifactId>matrix-rpc-core-api</artifactId>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
@@ -20,7 +20,11 @@
     <dependencies>
         <dependency>
             <groupId>io.homeey</groupId>
-            <artifactId>matrix-rpc-core-api</artifactId>
+            <artifactId>matrix-rpc-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.homeey</groupId>
+            <artifactId>matrix-rpc-spi</artifactId>
         </dependency>
     </dependencies>
 </project>
