@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+option java_package = "io.homeey.matrix.rpc.codec.protobuf";
+option java_outer_classname = "RpcProto";
+
+message RpcRequest {
+  int64 requestId = 1;
+  string serviceName = 2;
+  string methodName = 3;
+  repeated string parameterTypes = 4;  // 参数类型全限定名
+  repeated bytes arguments = 5;         // 修正为 repeated bytes
+  map<string, string> attachments = 6;  // 附加属性
+}
+
+message RpcResponse {
+  bytes result = 1;                     // 修正为 bytes 以支持任意类型
+  string exception = 2;
+}

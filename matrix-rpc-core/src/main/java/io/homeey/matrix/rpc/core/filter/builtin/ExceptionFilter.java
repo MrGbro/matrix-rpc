@@ -1,10 +1,10 @@
 package io.homeey.matrix.rpc.core.filter.builtin;
 
 
-import io.homeey.matrix.rpc.core.filter.Filter;
-import io.homeey.matrix.rpc.core.invocation.Invocation;
-import io.homeey.matrix.rpc.core.invocation.Result;
-import io.homeey.matrix.rpc.core.invoker.Invoker;
+import io.homeey.matrix.rpc.common.Result;
+import io.homeey.matrix.rpc.core.Filter;
+import io.homeey.matrix.rpc.core.Invocation;
+import io.homeey.matrix.rpc.core.Invoker;
 
 public class ExceptionFilter implements Filter {
 
@@ -15,7 +15,7 @@ public class ExceptionFilter implements Filter {
         } catch (Throwable t) {
             System.err.println(
                     "[RPC] exception at " +
-                            invocation.serviceName() + ": " +
+                            invocation.methodName() + ": " +
                             t.getMessage()
             );
             throw t;

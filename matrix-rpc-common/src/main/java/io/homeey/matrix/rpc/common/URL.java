@@ -1,5 +1,6 @@
 package io.homeey.matrix.rpc.common;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.*;
 
@@ -9,13 +10,28 @@ import java.util.*;
  * 格式: protocol://host:port/path?key1=value1&key2=value2
  */
 public class URL implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 8248119106126431701L;
 
-    private static final long serialVersionUID = 1L;
-
+    /**
+     * 协议，例如：dubbo、http等
+     */
     private final String protocol;
+    /**
+     * 主机地址
+     */
     private final String host;
+    /**
+     * 端口号
+     */
     private final int port;
+    /**
+     * 路径，通常是服务的上下文路径
+     */
     private final String path;
+    /**
+     * 参数集合，包含URL中的查询参数等配置信息
+     */
     private final Map<String, String> parameters;
 
     public URL(String protocol, String host, int port, String path, Map<String, String> parameters) {

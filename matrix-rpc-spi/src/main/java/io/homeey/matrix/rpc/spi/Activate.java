@@ -14,7 +14,7 @@ public @interface Activate {
     /**
      * 作用域,默认为全部作用域
      */
-    String[] scope() default {"CONSUMER", "PROVIDER"};
+    String[] group() default {"CONSUMER", "PROVIDER"};
 
     /**
      * 激活优先级，值越小越靠前

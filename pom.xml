@@ -14,9 +14,13 @@
         <module>matrix-rpc-common</module>
         <module>matrix-rpc-bom</module>
         <module>matrix-rpc-spi</module>
-        <module>matrix-rpc-core-api</module>
         <module>matrix-rpc-core</module>
         <module>matrix-rpc-examples</module>
+        <module>matrix-rpc-transport</module>
+        <module>matrix-rpc-registry</module>
+        <module>matrix-rpc-codec</module>
+        <module>matrix-rpc-cluster</module>
+        <module>matrix-rpc-filter</module>
     </modules>
 
     <properties>
@@ -49,16 +53,36 @@
             <dependency>
                 <groupId>io.homeey</groupId>
                 <artifactId>matrix-rpc-common</artifactId>
-                <version>${version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.homeey</groupId>
                 <artifactId>matrix-rpc-spi</artifactId>
-                <version>${version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.homeey</groupId>
-                <artifactId>matrix-rpc-core-api</artifactId>
+                <artifactId>matrix-rpc-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.homeey</groupId>
+                <artifactId>matrix-rpc-transport-api</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.homeey</groupId>
+                <artifactId>matrix-rpc-codec-api</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.homeey</groupId>
+                <artifactId>matrix-rpc-register-api</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.homeey</groupId>
+                <artifactId>matrix-rpc-cluster-api</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>
@@ -98,6 +122,11 @@
                 <version>${lombok.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>com.alibaba.nacos</groupId>
+                <artifactId>nacos-client</artifactId>
+                <version>2.2.3</version>
+            </dependency>
             <dependency>
                 <groupId>org.junit.jupiter</groupId>
                 <artifactId>junit-jupiter</artifactId>

@@ -1,0 +1,1 @@
+random=io.homeey.matrix.rpc.cluster.loadbalance.RandomLoadBalance

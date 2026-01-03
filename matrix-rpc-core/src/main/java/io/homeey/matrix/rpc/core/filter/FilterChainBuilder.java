@@ -1,9 +1,10 @@
 package io.homeey.matrix.rpc.core.filter;
 
 
-import io.homeey.matrix.rpc.core.invocation.Invocation;
-import io.homeey.matrix.rpc.core.invocation.Result;
-import io.homeey.matrix.rpc.core.invoker.Invoker;
+import io.homeey.matrix.rpc.common.Result;
+import io.homeey.matrix.rpc.core.Filter;
+import io.homeey.matrix.rpc.core.Invocation;
+import io.homeey.matrix.rpc.core.Invoker;
 
 import java.util.List;
 
