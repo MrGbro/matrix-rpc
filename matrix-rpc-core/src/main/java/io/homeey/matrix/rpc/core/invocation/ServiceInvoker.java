@@ -1,6 +1,9 @@
 package io.homeey.matrix.rpc.core.invocation;
 
-import io.homeey.matrix.rpc.core.invoker.Invoker;
+
+import io.homeey.matrix.rpc.common.Result;
+import io.homeey.matrix.rpc.core.Invocation;
+import io.homeey.matrix.rpc.core.Invoker;
 
 import java.lang.reflect.Method;
 
@@ -27,9 +30,9 @@ public class ServiceInvoker<T> implements Invoker<T> {
                     invocation.parameterTypes()
             );
             Object value = method.invoke(service, invocation.arguments());
-            return new DefaultResult(value);
+            return new Result(value);
         } catch (Throwable e) {
-            return new DefaultResult(e);
+            return new Result(e);
         }
     }
 }

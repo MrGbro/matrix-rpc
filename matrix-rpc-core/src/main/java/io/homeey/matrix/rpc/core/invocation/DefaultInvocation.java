@@ -1,5 +1,7 @@
 package io.homeey.matrix.rpc.core.invocation;
 
+import io.homeey.matrix.rpc.core.Invocation;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,7 +24,7 @@ public class DefaultInvocation implements Invocation {
     }
 
     @Override
-    public String serviceName() {
+    public String getServiceName() {
         return serviceName;
     }
 
@@ -42,7 +44,7 @@ public class DefaultInvocation implements Invocation {
     }
 
     @Override
-    public Map<String, String> attachments() {
+    public Map<String, String> getAttachments() {
         return attachments;
     }
 }

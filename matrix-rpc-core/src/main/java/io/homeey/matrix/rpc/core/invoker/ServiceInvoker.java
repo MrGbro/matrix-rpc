@@ -1,8 +1,8 @@
 package io.homeey.matrix.rpc.core.invoker;
 
-import io.homeey.matrix.rpc.core.ExecuteResult;
-import io.homeey.matrix.rpc.core.invocation.Invocation;
-import io.homeey.matrix.rpc.core.invocation.Result;
+
+import io.homeey.matrix.rpc.common.Result;
+import io.homeey.matrix.rpc.core.Invocation;
 
 import java.lang.reflect.Method;
 
@@ -29,9 +29,9 @@ public class ServiceInvoker<T> extends AbstractInvoker<T> {
             Object value =
                     method.invoke(service, invocation.arguments());
 
-            return ExecuteResult.success(value);
+            return Result.success(value);
         } catch (Throwable t) {
-            return ExecuteResult.fail(t);
+            return Result.fail(t);
         }
     }
 }

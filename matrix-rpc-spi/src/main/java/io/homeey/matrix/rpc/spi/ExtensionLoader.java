@@ -1,184 +1,161 @@
 package io.homeey.matrix.rpc.spi;
 
-import io.homeey.matrix.rpc.common.Holder;
-
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
-import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
-/**
- *
- * @author jt4mrg@gmail.com
- * @since 2025-12-31
- **/
 public class ExtensionLoader<T> {
-    private static final String MATRIX_DIRECTORY = "META-INF/matrix/";
+    private static final String SERVICES_DIR = "META-INF/services/";
+    private static final String MATRIX_DIR = "META-INF/matrix/";
 
-    private static final Map<Class<?>, ExtensionLoader<?>> LOADERS = new ConcurrentHashMap<>();
-    private static final Map<Class<?>, Object> EXTENSION_INSTANCES = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<Class<?>, ExtensionLoader<?>> LOADERS
+            = new ConcurrentHashMap<>();
 
     private final Class<T> type;
-
-    private final Holder<Map<String, Class<?>>> cachedClasses = new Holder<>();
-    private final Map<String, Holder<T>> cachedInstances = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, Holder<Object>> cachedInstances
+            = new ConcurrentHashMap<>();
+    private volatile Class<?> cachedAdaptiveClass;
+    private String cachedDefaultName;
 
     private ExtensionLoader(Class<T> type) {
         this.type = type;
     }
 
-    @SuppressWarnings("unchecked")
     public static <T> ExtensionLoader<T> getExtensionLoader(Class<T> type) {
-        if (!type.isInterface()) {
-            throw new IllegalArgumentException("SPI type must be interface.");
+        if (!type.isInterface() || !type.isAnnotationPresent(SPI.class)) {
+            throw new IllegalArgumentException("Extension type must be SPI interface");
         }
-        if (!type.isAnnotationPresent(SPI.class)) {
-            throw new IllegalArgumentException("SPI interface must be annotated with @SPI");
-        }
-        return (ExtensionLoader<T>) LOADERS.computeIfAbsent(type, ExtensionLoader::new);
+        return (ExtensionLoader<T>) LOADERS.computeIfAbsent(type,
+                k -> new ExtensionLoader<>(type));
     }
 
-    public T getDefaultExtension() {
-        SPI spi = type.getAnnotation(SPI.class);
-        if (spi == null || spi.value().isEmpty()) {
-            return null;
-        }
-        return getExtension(spi.value());
-    }
-
+    // 获取指定名称的扩展实例
     public T getExtension(String name) {
-        Holder<T> holder = cachedInstances.computeIfAbsent(name, k -> new Holder<>());
-        T instance = holder.get();
-        if (instance == null) {
+        if ("adaptive".equals(name)) {
+            return getAdaptiveExtension();
+        }
+        Holder<Object> holder = cachedInstances.computeIfAbsent(name, k -> new Holder<>());
+        if (holder.get() == null) {
             synchronized (holder) {
-                instance = holder.get();
-                if (instance == null) {
-                    instance = createExtension(name);
-                    holder.set(instance);
+                if (holder.get() == null) {
+                    try {
+                        holder.set(createExtension(name));
+                    } catch (Exception e) {
+                        throw new RuntimeException("Failed to create extension " + name, e);
+                    }
                 }
             }
         }
+        return (T) holder.get();
+    }
+
+    // 获取自适应扩展 (动态代理)
+    public T getAdaptiveExtension() {
+        if (cachedAdaptiveClass == null) {
+            cachedAdaptiveClass = createAdaptiveExtensionClass();
+        }
+        return (T) cachedInstances.computeIfAbsent("adaptive",
+                k -> new Holder<>()).get();
+    }
+
+    private <T> Class<T> createAdaptiveExtensionClass() {
+        //todo
+        return null;
+    }
+
+    // 获取默认扩展
+    public T getDefaultExtension() {
+        if (cachedDefaultName == null) {
+            SPI spi = type.getAnnotation(SPI.class);
+            cachedDefaultName = spi.value();
+        }
+        return getExtension(cachedDefaultName);
+    }
+
+    // 核心：创建扩展实例
+    private T createExtension(String name) throws NoSuchMethodException,
+            InvocationTargetException,
+            InstantiationException,
+            IllegalAccessException {
+        Class<?> clazz = getExtensionClasses().get(name);
+        if (clazz == null) {
+            throw new IllegalStateException("No extension named " + name);
+        }
+
+        // 1. 实例化
+        T instance = (T) clazz.getDeclaredConstructor().newInstance();
+
+        // 2. 自动注入依赖 (简化版)
+        injectDependencies(instance);
+
+        // 3. 包装扩展 (Wrapper模式)
+        instance = injectWrapper(instance);
+
         return instance;
     }
 
-    @SuppressWarnings("unchecked")
-    private T createExtension(String name) {
-        Class<?> clazz = getExtensionClasses().get(name);
-        if (clazz == null) {
-            throw new IllegalStateException("No such extension: " + name);
-        }
-        try {
-            return (T) EXTENSION_INSTANCES.computeIfAbsent(clazz, c -> {
-                try {
-                    return c.getDeclaredConstructor().newInstance();
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            });
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to create extension " + name, e);
-        }
-    }
-
+    // 加载扩展类
     private Map<String, Class<?>> getExtensionClasses() {
-        Map<String, Class<?>> classes = cachedClasses.get();
-        if (classes == null) {
-            synchronized (cachedClasses) {
-                classes = cachedClasses.get();
-                if (classes == null) {
-                    classes = loadExtensionClasses();
-                    cachedClasses.set(classes);
-                }
-            }
-        }
+        // 从 META-INF/matrix 和 META-INF/services 加载
+        Map<String, Class<?>> classes = new HashMap<>();
+        loadDirectory(classes, MATRIX_DIR);
+        loadDirectory(classes, SERVICES_DIR);
         return classes;
     }
 
-    private Map<String, Class<?>> loadExtensionClasses() {
-        Map<String, Class<?>> classes = new HashMap<>();
-
-        String fileName = MATRIX_DIRECTORY + type.getName();
-        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-
+    private void loadDirectory(Map<String, Class<?>> classes, String dir) {
+        String fileName = dir + type.getName();
         try {
-            Enumeration<URL> urls = classLoader.getResources(fileName);
+            Enumeration<URL> urls = getClassLoader().getResources(fileName);
             while (urls.hasMoreElements()) {
                 URL url = urls.nextElement();
-                loadResource(classes, classLoader, url);
-            }
-        } catch (IOException e) {
-            throw new IllegalStateException("Failed to load SPI file: " + fileName, e);
-        }
-        return classes;
-    }
-
-    private void loadResource(Map<String, Class<?>> classes,
-                              ClassLoader classLoader,
-                              URL resourceUrl) {
-
-        try (BufferedReader reader =
-                     new BufferedReader(new InputStreamReader(resourceUrl.openStream(), StandardCharsets.UTF_8))) {
-
-            String line;
-            while ((line = reader.readLine()) != null) {
-                line = line.trim();
-                if (line.isEmpty() || line.startsWith("#")) {
-                    continue;
+                try (BufferedReader reader = new BufferedReader(
+                        new InputStreamReader(url.openStream(), StandardCharsets.UTF_8))) {
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        line = line.trim();
+                        if (line.isEmpty() || line.startsWith("#")) continue;
+                        String[] parts = line.split("=");
+                        String name = parts[0].trim();
+                        String className = parts[1].trim();
+                        classes.put(name, Class.forName(className));
+                    }
                 }
-
-                String name;
-                String className;
-
-                int index = line.indexOf('=');
-                if (index > 0) {
-                    name = line.substring(0, index).trim();
-                    className = line.substring(index + 1).trim();
-                } else {
-                    throw new IllegalStateException("Invalid SPI line: " + line);
-                }
-
-                Class<?> clazz = Class.forName(className, true, classLoader);
-                classes.put(name, clazz);
             }
         } catch (Exception e) {
-            throw new IllegalStateException("Failed to load SPI resource " + resourceUrl, e);
+            throw new RuntimeException("Failed to load extension classes", e);
         }
     }
 
-    public List<T> getActivateExtensions(String group) {
-        List<T> extensions = new ArrayList<>();
-
-        for (Map.Entry<String, Class<?>> entry : getExtensionClasses().entrySet()) {
-            Class<?> clazz = entry.getValue();
-            Activate activate = clazz.getAnnotation(Activate.class);
-            if (activate == null) {
-                continue;
-            }
-            String[] scope = activate.scope();
-            Set<String> set = new HashSet<>();
-            set.addAll(Arrays.asList(scope));
-            if (set.contains(group)) {
-                extensions.add(getExtension(entry.getKey()));
-            }
-        }
-
-        extensions.sort(Comparator.comparingInt(o ->
-                o.getClass().getAnnotation(Activate.class).order()));
-
-        return extensions;
+    // 简化版依赖注入
+    private void injectDependencies(T instance) {
+        //todo 实际项目中这里会实现 setter 注入
     }
 
-    private boolean isWrapperClass(Class<?> clazz) {
-        for (Constructor<?> constructor : clazz.getConstructors()) {
-            Class<?>[] params = constructor.getParameterTypes();
-            if (params.length == 1 && params[0] == type) {
-                return true;
-            }
+    // Wrapper包装
+    private T injectWrapper(T instance) {
+        //todo 伪代码：扫描所有Wrapper类进行包装
+        return instance;
+    }
+
+    private ClassLoader getClassLoader() {
+        return ExtensionLoader.class.getClassLoader();
+    }
+
+    private static class Holder<T> {
+        private volatile T value;
+
+        public T get() {
+            return value;
         }
-        return false;
+
+        public void set(T value) {
+            this.value = value;
+        }
     }
 }

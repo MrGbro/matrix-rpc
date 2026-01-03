@@ -21,7 +21,12 @@
         <dependency>
             <groupId>io.homeey</groupId>
             <artifactId>matrix-rpc-core</artifactId>
-            <version>${parent.version}</version>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.homeey</groupId>
+            <artifactId>matrix-rpc-transport-netty</artifactId>
+            <version>${project.parent.version}</version>
         </dependency>
     </dependencies>
 </project>

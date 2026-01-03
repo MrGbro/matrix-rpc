@@ -1,5 +1,6 @@
 package io.homeey.matrix.rpc.core.filter;
 
+import io.homeey.matrix.rpc.core.Filter;
 import io.homeey.matrix.rpc.spi.Activate;
 
 import java.util.Comparator;
