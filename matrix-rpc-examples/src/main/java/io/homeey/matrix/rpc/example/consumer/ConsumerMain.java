@@ -4,46 +4,53 @@ import io.homeey.matrix.rpc.common.Result;
 import io.homeey.matrix.rpc.common.URL;
 import io.homeey.matrix.rpc.core.Invocation;
 import io.homeey.matrix.rpc.core.Invoker;
-import io.homeey.matrix.rpc.core.Protocol;
+import io.homeey.matrix.rpc.core.SimpleInvocation;
+import io.homeey.matrix.rpc.core.invoker.AbstractInvoker;
 import io.homeey.matrix.rpc.example.api.EchoService;
-import io.homeey.matrix.rpc.spi.ExtensionLoader;
-
-import java.util.Map;
+import io.homeey.matrix.rpc.transport.api.TransportClient;
+import io.homeey.matrix.rpc.transport.netty.client.NettyTransportClient;
 
 public class ConsumerMain {
-    public static void main(String[] args) {
-        // 1. 通过SPI获取Protocol
-        Protocol protocol = ExtensionLoader.getExtensionLoader(Protocol.class)
-                .getExtension("matrix");
+    public static void main(String[] args) throws Exception {
+        System.out.println("========================================");
+        System.out.println("Matrix RPC Consumer - Direct Connection");
+        System.out.println("========================================");
+        
+        // 1. 创建直连客户端（无需注册中心）
+        URL providerUrl = new URL("matrix", "localhost", 20880, EchoService.class.getName(), null);
+        TransportClient client = new NettyTransportClient(providerUrl);
+        client.connect();
+        System.out.println("Connected to provider: " + providerUrl.getAddress());
+        
+        // 2. 创建Invoker
+        Invoker<EchoService> invoker = new AbstractInvoker<EchoService>(EchoService.class) {
+            @Override
+            public Result invoke(Invocation invocation) {
+                return client.send(invocation, 3000);
+            }
+        };
 
-        // 2. 引用远程服务
-        URL url = new URL("matrix", "localhost", 20880, EchoService.class.getName(), null);
-        Invoker<EchoService> invoker = protocol.refer(EchoService.class, url);
-
-        // 3. 创建Invocation (简化)
+        // 3. 创建Invocation并调用
         Invocation invocation = new SimpleInvocation(
+                EchoService.class.getName(),
                 "echo",
                 new Class[]{String.class},
                 new Object[]{"Hello Matrix RPC!"}
         );
 
-        // 4. 调用 (Phase 1 需手动构造请求)
+        System.out.println("\nCalling remote service...");
         Result result = invoker.invoke(invocation);
-        System.out.println("Result: " + result.getValue(String.class));
-    }
-
-    // 简化版Invocation
-        private record SimpleInvocation(String methodName, Class<?>[] parameterTypes,
-                                        Object[] arguments) implements Invocation {
-
-        @Override
-            public String getServiceName() {
-                return EchoService.class.getName();
-            }
-
-            @Override
-            public Map<String, String> getAttachments() {
-                return Map.of();
-            }
+        
+        if (result.hasException()) {
+            System.err.println("RPC call failed: " + result.getException().getMessage());
+        } else {
+            System.out.println("RPC Result: " + result.getValue(String.class));
         }
+        
+        // 4. 关闭连接
+        client.close();
+        System.out.println("\n========================================");
+        System.out.println("RPC call completed!");
+        System.out.println("========================================");
+    }
 }

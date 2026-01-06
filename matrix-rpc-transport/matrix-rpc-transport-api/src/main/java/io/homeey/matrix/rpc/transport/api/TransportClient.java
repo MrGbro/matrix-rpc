@@ -2,6 +2,7 @@ package io.homeey.matrix.rpc.transport.api;
 
 import io.homeey.matrix.rpc.common.Result;
 import io.homeey.matrix.rpc.core.Invocation;
+import io.homeey.matrix.rpc.spi.SPI;
 
 import java.io.Closeable;
 
@@ -10,6 +11,7 @@ import java.io.Closeable;
  * @author jt4mrg@gmail.com
  * @since 2026-01-03
  **/
+@SPI("netty")
 public interface TransportClient extends Closeable {
 
     /**

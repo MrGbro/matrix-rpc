@@ -92,6 +92,21 @@
                 <version>${revision}</version>
             </dependency>
             <dependency>
+                <groupId>io.homeey</groupId>
+                <artifactId>matrix-rpc-runtime</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.homeey</groupId>
+                <artifactId>matrix-rpc-transport-netty</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.homeey</groupId>
+                <artifactId>matrix-rpc-registy-memory</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-all</artifactId>
                 <version>${netty.version}</version>

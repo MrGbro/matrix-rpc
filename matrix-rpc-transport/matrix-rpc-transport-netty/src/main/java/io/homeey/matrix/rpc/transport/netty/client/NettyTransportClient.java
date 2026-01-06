@@ -130,7 +130,8 @@ public class NettyTransportClient implements TransportClient {
     }
 
     private Result buildResult(RpcProto.RpcResponse response) {
-        if (response.getException()!=null) {
+        // protobuf中string类型默认是空字符串，不是null
+        if (response.getException() != null && !response.getException().isEmpty()) {
             return new Result(new RuntimeException(response.getException()));
         }
         return new Result(response.getResult().toStringUtf8());

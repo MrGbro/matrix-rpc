@@ -1,1 +1,1 @@
-matrix=io.homeey.matrix.rpc.core.impl.MatrixProtocol
+matrix=io.homeey.matrix.rpc.runtime.MatrixProtocol

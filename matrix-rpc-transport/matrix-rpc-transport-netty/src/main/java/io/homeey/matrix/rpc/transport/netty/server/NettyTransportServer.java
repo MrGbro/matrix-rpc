@@ -126,6 +126,7 @@ public class NettyTransportServer implements TransportServer {
     private class RpcServerHandler extends SimpleChannelInboundHandler<RpcProto.RpcRequest> {
         @Override
         protected void channelRead0(ChannelHandlerContext ctx, RpcProto.RpcRequest request) {
+            long requestId = request.getRequestId();
             try {
                 // 1. 将Protobuf请求转为Invocation
                 Invocation invocation = convertToInvocation(request);
@@ -134,13 +135,14 @@ public class NettyTransportServer implements TransportServer {
                 Result result = requestHandler.handle(invocation);
 
                 // 3. 构建响应
-                RpcProto.RpcResponse response = buildResponse(result);
+                RpcProto.RpcResponse response = buildResponse(requestId, result);
 
                 // 4. 发送响应
                 ctx.writeAndFlush(response);
             } catch (Exception e) {
                 // 构建错误响应
                 RpcProto.RpcResponse errorResponse = RpcProto.RpcResponse.newBuilder()
+                        .setRequestId(requestId)
                         .setException("Internal error: " + e.getMessage())
                         .build();
                 ctx.writeAndFlush(errorResponse);
@@ -208,8 +210,9 @@ public class NettyTransportServer implements TransportServer {
             }
         }
 
-        private RpcProto.RpcResponse buildResponse(Result result) {
-            RpcProto.RpcResponse.Builder builder = RpcProto.RpcResponse.newBuilder();
+        private RpcProto.RpcResponse buildResponse(long requestId, Result result) {
+            RpcProto.RpcResponse.Builder builder = RpcProto.RpcResponse.newBuilder()
+                    .setRequestId(requestId);
             if (result.hasException()) {
                 builder.setException(result.getException().getMessage());
             } else {

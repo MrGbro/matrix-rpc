@@ -14,6 +14,7 @@ import io.homeey.matrix.rpc.spi.ExtensionLoader;
 import io.homeey.matrix.rpc.spi.SPI;
 import io.homeey.matrix.rpc.transport.api.TransportClient;
 import io.homeey.matrix.rpc.transport.api.TransportServer;
+import io.homeey.matrix.rpc.transport.netty.client.NettyTransportClient;
 
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -37,7 +38,8 @@ public class MatrixProtocol implements Protocol {
         this.transportServer = ExtensionLoader.getExtensionLoader(TransportServer.class)
                 .getExtension("netty");
 
-        String registryAddress = System.getProperty("matrix.registry.address", "nacos://localhost:8848");
+        // 2. 默认使用memory注册中心，可通过系统属性覆盖
+        String registryAddress = System.getProperty("matrix.registry.address", "memory://localhost");
         URL registryUrl = URL.valueOf(registryAddress);
         RegistryFactory registryFactory = ExtensionLoader.getExtensionLoader(RegistryFactory.class)
                 .getExtension(registryUrl.getProtocol());
@@ -136,8 +138,8 @@ public class MatrixProtocol implements Protocol {
     }
 
     private TransportClient createClient(URL url) {
-        TransportClient client = ExtensionLoader.getExtensionLoader(TransportClient.class)
-                .getExtension(url.getProtocol());
+        // 直接创建NettyTransportClient（因为需要URL参数）
+        NettyTransportClient client = new NettyTransportClient(url);
         try {
             client.connect();
         } catch (Exception e) {

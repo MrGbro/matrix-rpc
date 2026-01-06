@@ -5,26 +5,85 @@ import io.homeey.matrix.rpc.common.URL;
 import io.homeey.matrix.rpc.registry.api.NotifyListener;
 import io.homeey.matrix.rpc.registry.api.Registry;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
+/**
+ * 内存注册中心实现 - 用于本地测试
+ */
 public class MemoryRegistry implements Registry {
+    
+    // 单例，保证Provider和Consumer共享注册信息
+    private static final MemoryRegistry INSTANCE = new MemoryRegistry();
+    
+    // 服务接口 -> 提供者列表
+    private final ConcurrentMap<String, List<URL>> services = new ConcurrentHashMap<>();
+    
+    // 服务接口 -> 订阅者列表
+    private final ConcurrentMap<String, List<NotifyListener>> listeners = new ConcurrentHashMap<>();
+    
+    private MemoryRegistry() {
+        // 私有构造函数
+    }
+    
+    public static MemoryRegistry getInstance() {
+        return INSTANCE;
+    }
+    
     @Override
     public void register(URL url) {
-
+        String serviceKey = url.getPath();
+        services.computeIfAbsent(serviceKey, k -> new CopyOnWriteArrayList<>()).add(url);
+        System.out.println("[MemoryRegistry] Service registered: " + url);
+        
+        // 通知订阅者
+        notifyListeners(serviceKey);
     }
 
     @Override
     public void unregister(URL url) {
-
+        String serviceKey = url.getPath();
+        List<URL> urls = services.get(serviceKey);
+        if (urls != null) {
+            urls.remove(url);
+            System.out.println("[MemoryRegistry] Service unregistered: " + url);
+            notifyListeners(serviceKey);
+        }
     }
 
     @Override
     public List<URL> lookup(String serviceInterface, String group, String version) {
-        return List.of();
+        List<URL> urls = services.get(serviceInterface);
+        if (urls == null || urls.isEmpty()) {
+            System.out.println("[MemoryRegistry] No providers found for: " + serviceInterface);
+            return new ArrayList<>();
+        }
+        System.out.println("[MemoryRegistry] Found " + urls.size() + " providers for: " + serviceInterface);
+        return new ArrayList<>(urls);
     }
 
     @Override
     public void subscribe(String serviceInterface, NotifyListener listener) {
-
+        listeners.computeIfAbsent(serviceInterface, k -> new CopyOnWriteArrayList<>()).add(listener);
+        System.out.println("[MemoryRegistry] Service subscribed: " + serviceInterface);
+        
+        // 立即通知当前已注册的服务
+        List<URL> urls = services.get(serviceInterface);
+        if (urls != null && !urls.isEmpty()) {
+            listener.notify(new ArrayList<>(urls));
+        }
+    }
+    
+    private void notifyListeners(String serviceKey) {
+        List<NotifyListener> subscribedListeners = listeners.get(serviceKey);
+        if (subscribedListeners != null) {
+            List<URL> urls = services.getOrDefault(serviceKey, new ArrayList<>());
+            for (NotifyListener listener : subscribedListeners) {
+                listener.notify(new ArrayList<>(urls));
+            }
+        }
     }
 }
