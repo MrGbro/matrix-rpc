@@ -1,1 +1,1 @@
-nacos=io.homeey.matrix.rpc.registry.nacos.NacosRegistry
+memory=io.homeey.matrix.rpc.registry.MemoryRegistryFactory

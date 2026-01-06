@@ -13,6 +13,7 @@ message RpcRequest {
 }
 
 message RpcResponse {
-  bytes result = 1;                     // 修正为 bytes 以支持任意类型
-  string exception = 2;
+  int64 requestId = 1;                 // 请求ID，用于匹配请求和响应
+  bytes result = 2;                     // 修正为 bytes 以支持任意类型
+  string exception = 3;
 }

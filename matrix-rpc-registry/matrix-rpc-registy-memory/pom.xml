@@ -23,5 +23,9 @@
             <artifactId>matrix-rpc-register-api</artifactId>
             <version>${parent.version}</version>
         </dependency>
+        <dependency>
+            <groupId>io.homeey</groupId>
+            <artifactId>matrix-rpc-spi</artifactId>
+        </dependency>
     </dependencies>
 </project>
