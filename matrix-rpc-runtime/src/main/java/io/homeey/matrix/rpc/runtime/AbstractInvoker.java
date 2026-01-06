@@ -1,4 +1,4 @@
-package io.homeey.matrix.rpc.core.impl;
+package io.homeey.matrix.rpc.runtime;
 
 import io.homeey.matrix.rpc.core.Invoker;
 

@@ -1,6 +1,7 @@
-package io.homeey.matrix.rpc.core;
+package io.homeey.matrix.rpc.transport.api;
 
 import io.homeey.matrix.rpc.common.Result;
+import io.homeey.matrix.rpc.core.Invocation;
 
 /**
  *
