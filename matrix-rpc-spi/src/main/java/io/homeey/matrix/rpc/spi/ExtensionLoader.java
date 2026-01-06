@@ -22,6 +22,9 @@ public class ExtensionLoader<T> {
     private volatile Class<?> cachedAdaptiveClass;
     private String cachedDefaultName;
 
+    // 缓存扩展类映射，避免重复加载
+    private volatile Map<String, Class<?>> cachedClasses;
+
     private ExtensionLoader(Class<T> type) {
         this.type = type;
     }
@@ -99,13 +102,21 @@ public class ExtensionLoader<T> {
         return instance;
     }
 
-    // 加载扩展类
+    // 加载扩展类（带缓存）
     private Map<String, Class<?>> getExtensionClasses() {
-        // 从 META-INF/matrix 和 META-INF/services 加载
-        Map<String, Class<?>> classes = new HashMap<>();
-        loadDirectory(classes, MATRIX_DIR);
-        loadDirectory(classes, SERVICES_DIR);
-        return classes;
+        if (cachedClasses != null) {
+            return cachedClasses;
+        }
+        synchronized (this) {
+            if (cachedClasses == null) {
+                // 从 META-INF/matrix 和 META-INF/services 加载
+                Map<String, Class<?>> classes = new HashMap<>();
+                loadDirectory(classes, MATRIX_DIR);
+                loadDirectory(classes, SERVICES_DIR);
+                cachedClasses = classes;
+            }
+        }
+        return cachedClasses;
     }
 
     private void loadDirectory(Map<String, Class<?>> classes, String dir) {
@@ -145,6 +156,65 @@ public class ExtensionLoader<T> {
 
     private ClassLoader getClassLoader() {
         return ExtensionLoader.class.getClassLoader();
+    }
+
+    /**
+     * 获取指定分组下所有被 @Activate 注解标记的扩展实例
+     *
+     * @param group 分组名称，如 "CONSUMER" 或 "PROVIDER"
+     * @return 按 order 排序后的扩展实例列表
+     */
+    public List<T> getActivateExtensions(String group) {
+        Map<String, Class<?>> classes = getExtensionClasses();
+
+        // 收集匹配的扩展类及其 Activate 注解信息
+        List<ActivateInfo> activateInfos = new ArrayList<>();
+
+        for (Map.Entry<String, Class<?>> entry : classes.entrySet()) {
+            String name = entry.getKey();
+            Class<?> clazz = entry.getValue();
+
+            // 检查是否有 @Activate 注解
+            Activate activate = clazz.getAnnotation(Activate.class);
+            if (activate == null) {
+                continue;
+            }
+
+            // 检查 group 是否匹配
+            if (isGroupMatched(activate.group(), group)) {
+                activateInfos.add(new ActivateInfo(name, activate.order()));
+            }
+        }
+        // 实例化扩展
+        List<T> result = new ArrayList<>(activateInfos.size());
+        for (ActivateInfo info : activateInfos) {
+            result.add(getExtension(info.name));
+        }
+
+        return result;
+    }
+
+    /**
+     * 判断 group 是否匹配
+     */
+    private boolean isGroupMatched(String[] groups, String targetGroup) {
+        // 如果目标 group 为空，则匹配所有
+        if (targetGroup == null || targetGroup.isEmpty()) {
+            return true;
+        }
+        // 检查注解的 groups 是否包含目标 group
+        for (String g : groups) {
+            if (targetGroup.equalsIgnoreCase(g)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 用于排序的内部类，保存扩展名称和 order 值
+     */
+    private record ActivateInfo(String name, int order) {
     }
 
     private static class Holder<T> {

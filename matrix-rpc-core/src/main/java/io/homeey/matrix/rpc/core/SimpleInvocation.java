@@ -1,7 +1,5 @@
-package io.homeey.matrix.rpc.core.impl;
+package io.homeey.matrix.rpc.core;
 
-
-import io.homeey.matrix.rpc.core.Invocation;
 
 import java.util.Collections;
 import java.util.Map;
@@ -14,14 +12,14 @@ public class SimpleInvocation implements Invocation {
     private final Object[] arguments;
     private final Map<String, String> attachments;
     
-    public SimpleInvocation(String serviceName, String methodName, 
-                           Class<?>[] parameterTypes, Object[] arguments) {
+    public SimpleInvocation(String serviceName, String methodName,
+                            Class<?>[] parameterTypes, Object[] arguments) {
         this(serviceName, methodName, parameterTypes, arguments, Collections.emptyMap());
     }
     
-    public SimpleInvocation(String serviceName, String methodName, 
-                           Class<?>[] parameterTypes, Object[] arguments,
-                           Map<String, String> attachments) {
+    public SimpleInvocation(String serviceName, String methodName,
+                            Class<?>[] parameterTypes, Object[] arguments,
+                            Map<String, String> attachments) {
         this.serviceName = Objects.requireNonNull(serviceName, "Service name cannot be null");
         this.methodName = Objects.requireNonNull(methodName, "Method name cannot be null");
         this.parameterTypes = Objects.requireNonNull(parameterTypes, "Parameter types cannot be null");
