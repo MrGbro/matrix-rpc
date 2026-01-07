@@ -4,16 +4,17 @@ import io.homeey.matrix.rpc.common.Result;
 import io.homeey.matrix.rpc.common.URL;
 import io.homeey.matrix.rpc.core.Invocation;
 import io.homeey.matrix.rpc.core.Invoker;
-import io.homeey.matrix.rpc.core.SimpleInvocation;
 import io.homeey.matrix.rpc.core.invoker.AbstractInvoker;
 import io.homeey.matrix.rpc.example.api.EchoService;
+import io.homeey.matrix.rpc.proxy.api.ProxyFactory;
+import io.homeey.matrix.rpc.spi.ExtensionLoader;
 import io.homeey.matrix.rpc.transport.api.TransportClient;
 import io.homeey.matrix.rpc.transport.netty.client.NettyTransportClient;
 
 public class ConsumerMain {
     public static void main(String[] args) throws Exception {
         System.out.println("========================================");
-        System.out.println("Matrix RPC Consumer - Direct Connection");
+        System.out.println("Matrix RPC Consumer - With Dynamic Proxy");
         System.out.println("========================================");
         
         // 1. 创建直连客户端（无需注册中心）
@@ -30,24 +31,18 @@ public class ConsumerMain {
             }
         };
 
-        // 3. 创建Invocation并调用
-        Invocation invocation = new SimpleInvocation(
-                EchoService.class.getName(),
-                "echo",
-                new Class[]{String.class},
-                new Object[]{"Hello Matrix RPC!"}
-        );
-
-        System.out.println("\nCalling remote service...");
-        Result result = invoker.invoke(invocation);
+        // 3. 通过 SPI 获取 ProxyFactory，创建代理对象
+        ProxyFactory proxyFactory = ExtensionLoader.getExtensionLoader(ProxyFactory.class)
+                .getExtension("jdk");
+        EchoService echoService = proxyFactory.getProxy(invoker);
         
-        if (result.hasException()) {
-            System.err.println("RPC call failed: " + result.getException().getMessage());
-        } else {
-            System.out.println("RPC Result: " + result.getValue(String.class));
-        }
+        System.out.println("\n--- Using Dynamic Proxy ---");
         
-        // 4. 关闭连接
+        // 4. 像调用本地方法一样调用远程服务
+        String result = echoService.echo("Hello Matrix RPC with Proxy!");
+        System.out.println("RPC Result: " + result);
+        
+        // 5. 关闭连接
         client.close();
         System.out.println("\n========================================");
         System.out.println("RPC call completed!");

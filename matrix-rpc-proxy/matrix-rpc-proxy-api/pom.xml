@@ -5,18 +5,19 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>io.homeey</groupId>
-        <artifactId>matrix-rpc</artifactId>
+        <artifactId>matrix-rpc-proxy</artifactId>
         <version>${revision}</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>matrix-rpc-examples</artifactId>
+    <artifactId>matrix-rpc-proxy-api</artifactId>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+
     <dependencies>
         <dependency>
             <groupId>io.homeey</groupId>
@@ -24,19 +25,7 @@
         </dependency>
         <dependency>
             <groupId>io.homeey</groupId>
-            <artifactId>matrix-rpc-runtime</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.homeey</groupId>
-            <artifactId>matrix-rpc-transport-netty</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.homeey</groupId>
-            <artifactId>matrix-rpc-registy-memory</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.homeey</groupId>
-            <artifactId>matrix-rpc-proxy-jdk</artifactId>
+            <artifactId>matrix-rpc-spi</artifactId>
         </dependency>
     </dependencies>
 </project>
