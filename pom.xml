@@ -22,6 +22,7 @@
         <module>matrix-rpc-cluster</module>
         <module>matrix-rpc-filter</module>
         <module>matrix-rpc-runtime</module>
+        <module>matrix-rpc-proxy</module>
     </modules>
 
     <properties>
@@ -45,7 +46,7 @@
 
         <!--project version control-->
         <maven_flatten_version>1.7.3</maven_flatten_version>
-        <revision>0.0.1</revision>
+        <revision>0.0.2</revision>
     </properties>
 
     <dependencyManagement>
@@ -104,6 +105,16 @@
             <dependency>
                 <groupId>io.homeey</groupId>
                 <artifactId>matrix-rpc-registy-memory</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.homeey</groupId>
+                <artifactId>matrix-rpc-proxy-api</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.homeey</groupId>
+                <artifactId>matrix-rpc-proxy-jdk</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>
