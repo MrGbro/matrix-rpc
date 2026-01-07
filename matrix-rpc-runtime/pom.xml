@@ -20,6 +20,10 @@
     <dependencies>
         <dependency>
             <groupId>io.homeey</groupId>
+            <artifactId>matrix-rpc-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.homeey</groupId>
             <artifactId>matrix-rpc-core</artifactId>
         </dependency>
         <dependency>
@@ -33,6 +37,10 @@
         <dependency>
             <groupId>io.homeey</groupId>
             <artifactId>matrix-rpc-filter-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.homeey</groupId>
+            <artifactId>matrix-rpc-proxy-api</artifactId>
         </dependency>
     </dependencies>
 </project>

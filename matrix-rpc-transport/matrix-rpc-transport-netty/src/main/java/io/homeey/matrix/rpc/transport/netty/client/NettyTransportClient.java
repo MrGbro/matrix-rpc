@@ -25,15 +25,29 @@ import java.util.concurrent.atomic.AtomicLong;
 
 @Activate(order = 100)
 public class NettyTransportClient implements TransportClient {
-    private final URL url;
-    private final EventLoopGroup group;
-    private final Bootstrap bootstrap;
+    private URL url;
+    private EventLoopGroup group;
+    private Bootstrap bootstrap;
     private Channel channel;
     private final ConcurrentHashMap<Long, CompletableFuture<RpcProto.RpcResponse>> pendingRequests
             = new ConcurrentHashMap<>();
     private final AtomicLong requestIdGenerator = new AtomicLong(0);
 
+    /**
+     * 无参构造，用于 SPI 加载
+     */
+    public NettyTransportClient() {
+    }
+
+    /**
+     * 有参构造，用于直接实例化
+     */
     public NettyTransportClient(URL url) {
+        init(url);
+    }
+
+    @Override
+    public void init(URL url) {
         this.url = url;
         this.group = new NioEventLoopGroup();
         this.bootstrap = new Bootstrap();
@@ -58,6 +72,11 @@ public class NettyTransportClient implements TransportClient {
         ChannelFuture future = bootstrap.connect(url.getHost(), url.getPort()).sync();
         this.channel = future.channel();
         System.out.println("[Netty] Connected to server: " + url.getHost() + ":" + url.getPort());
+    }
+
+    @Override
+    public boolean isConnected() {
+        return channel != null && channel.isActive();
     }
 
     @Override
