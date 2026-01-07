@@ -1,6 +1,7 @@
 package io.homeey.matrix.rpc.transport.api;
 
 import io.homeey.matrix.rpc.common.Result;
+import io.homeey.matrix.rpc.common.URL;
 import io.homeey.matrix.rpc.core.Invocation;
 import io.homeey.matrix.rpc.spi.SPI;
 
@@ -13,6 +14,13 @@ import java.io.Closeable;
  **/
 @SPI("netty")
 public interface TransportClient extends Closeable {
+
+    /**
+     * 初始化客户端（用于 SPI 加载后配置）
+     *
+     * @param url 服务端地址信息
+     */
+    void init(URL url);
 
     /**
      * 发送调用请求并返回结果
@@ -29,4 +37,11 @@ public interface TransportClient extends Closeable {
      * @throws Exception 连接过程中可能出现的异常
      */
     void connect() throws Exception;
+
+    /**
+     * 检查连接状态
+     *
+     * @return 是否已连接
+     */
+    boolean isConnected();
 }
