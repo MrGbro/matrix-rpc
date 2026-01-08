@@ -1,12 +1,14 @@
 package io.homeey.matrix.rpc.transport.netty.server;
 
 import com.google.protobuf.ByteString;
+import io.homeey.matrix.rpc.codec.api.Codec;
 import io.homeey.matrix.rpc.codec.protobuf.RpcProto;
 import io.homeey.matrix.rpc.common.Result;
 import io.homeey.matrix.rpc.common.URL;
 import io.homeey.matrix.rpc.core.Invocation;
 import io.homeey.matrix.rpc.core.SimpleInvocation;
 import io.homeey.matrix.rpc.spi.Activate;
+import io.homeey.matrix.rpc.spi.ExtensionLoader;
 import io.homeey.matrix.rpc.transport.api.RequestHandler;
 import io.homeey.matrix.rpc.transport.api.TransportServer;
 import io.netty.bootstrap.ServerBootstrap;
@@ -31,6 +33,13 @@ public class NettyTransportServer implements TransportServer {
     private Channel serverChannel;
     private final AtomicBoolean started = new AtomicBoolean(false);
     private RequestHandler requestHandler;
+    private final Codec codec; // 使用 SPI 获取序列化器
+
+    public NettyTransportServer() {
+        // 默认使用 kryo 序列化器
+        this.codec = ExtensionLoader.getExtensionLoader(Codec.class)
+                .getExtension("kryo");
+    }
 
     @Override
     public synchronized void start(URL url, RequestHandler requestHandler) {
@@ -163,18 +172,11 @@ public class NettyTransportServer implements TransportServer {
                         .map(this::loadClass)
                         .toArray(Class<?>[]::new);
 
-                // 2. 反序列化参数 (Phase 2 将使用 Codec SPI)
+                // 2. 反序列化参数 - 支持复杂对象类型
                 Object[] arguments = new Object[request.getArgumentsCount()];
                 for (int i = 0; i < arguments.length; i++) {
-                    // 简化版：只处理 String 类型
-                    if (parameterTypes[i] == String.class) {
-                        arguments[i] = request.getArguments(i).toStringUtf8();
-                    } else {
-                        // Phase 2 将集成完整的编解码器
-                        throw new UnsupportedOperationException(
-                                "Only String type is supported in Phase 1. Unsupported parameter type: " +
-                                        parameterTypes[i].getName());
-                    }
+                    byte[] argBytes = request.getArguments(i).toByteArray();
+                    arguments[i] = codec.decode(argBytes, parameterTypes[i]);
                 }
 
                 // 3. 转换 attachments
@@ -189,24 +191,54 @@ public class NettyTransportServer implements TransportServer {
                         attachments
                 );
             } catch (Exception e) {
-                throw new RuntimeException("Failed to load parameter class", e);
+                throw new RuntimeException("Failed to convert request to invocation", e);
             }
         }
 
         private Class<?> loadClass(String className) {
-            // 简化版：只支持基本类型和 String
+            // 支持基本类型
             switch (className) {
                 case "java.lang.String":
                     return String.class;
                 case "int":
                     return int.class;
+                case "java.lang.Integer":
+                    return Integer.class;
                 case "long":
                     return long.class;
+                case "java.lang.Long":
+                    return Long.class;
                 case "boolean":
                     return boolean.class;
-                // Phase 2 扩展更多类型
+                case "java.lang.Boolean":
+                    return Boolean.class;
+                case "double":
+                    return double.class;
+                case "java.lang.Double":
+                    return Double.class;
+                case "float":
+                    return float.class;
+                case "java.lang.Float":
+                    return Float.class;
+                case "byte":
+                    return byte.class;
+                case "java.lang.Byte":
+                    return Byte.class;
+                case "short":
+                    return short.class;
+                case "java.lang.Short":
+                    return Short.class;
+                case "char":
+                    return char.class;
+                case "java.lang.Character":
+                    return Character.class;
                 default:
-                    throw new UnsupportedOperationException("Unsupported parameter type in Phase 1: " + className);
+                    // 动态加载其他类型
+                    try {
+                        return Class.forName(className);
+                    } catch (ClassNotFoundException e) {
+                        throw new RuntimeException("Failed to load class: " + className, e);
+                    }
             }
         }
 
@@ -217,16 +249,10 @@ public class NettyTransportServer implements TransportServer {
                 builder.setException(result.getException().getMessage());
             } else {
                 try {
-                    // 简化版：只处理 String 返回值
+                    // 序列化返回值 - 支持复杂对象类型
                     Object value = result.getValue(Object.class);
-                    if (value instanceof String) {
-                        builder.setResult(ByteString.copyFromUtf8((String) value));
-                    } else {
-                        // Phase 2 将集成完整的编解码器
-                        throw new UnsupportedOperationException(
-                                "Only String return type is supported in Phase 1. Actual type: " +
-                                        value.getClass().getName());
-                    }
+                    byte[] serialized = codec.encode(value);
+                    builder.setResult(ByteString.copyFrom(serialized));
                 } catch (Exception e) {
                     builder.setException("Serialization error: " + e.getMessage());
                 }

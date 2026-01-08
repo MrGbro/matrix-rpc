@@ -1,13 +1,11 @@
 package io.homeey.matrix.rpc.transport.netty.client;
 
 import com.google.protobuf.ByteString;
-import io.homeey.matrix.rpc.codec.api.Codec;
 import io.homeey.matrix.rpc.codec.protobuf.RpcProto;
 import io.homeey.matrix.rpc.common.Result;
 import io.homeey.matrix.rpc.common.URL;
 import io.homeey.matrix.rpc.core.Invocation;
 import io.homeey.matrix.rpc.spi.Activate;
-import io.homeey.matrix.rpc.spi.ExtensionLoader;
 import io.homeey.matrix.rpc.transport.api.TransportClient;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
@@ -34,22 +32,17 @@ public class NettyTransportClient implements TransportClient {
     private final ConcurrentHashMap<Long, CompletableFuture<RpcProto.RpcResponse>> pendingRequests
             = new ConcurrentHashMap<>();
     private final AtomicLong requestIdGenerator = new AtomicLong(0);
-    private final Codec codec; // 使用 SPI 获取序列化器
 
     /**
      * 无参构造，用于 SPI 加载
      */
     public NettyTransportClient() {
-        // 默认使用 kryo 序列化器
-        this.codec = ExtensionLoader.getExtensionLoader(Codec.class)
-                .getExtension("kryo");
     }
 
     /**
      * 有参构造，用于直接实例化
      */
     public NettyTransportClient(URL url) {
-        this();
         init(url);
     }
 
@@ -141,10 +134,15 @@ public class NettyTransportClient implements TransportClient {
             builder.addParameterTypes(paramType.getName());
         }
 
-        // 添加参数值 - 支持复杂对象类型
+        // 添加参数值 (简化版，只处理String)
         for (Object arg : invocation.arguments()) {
-            byte[] serialized = codec.encode(arg);
-            builder.addArguments(ByteString.copyFrom(serialized));
+            if (arg instanceof String) {
+                builder.addArguments(ByteString.copyFromUtf8((String) arg));
+            } else {
+                throw new UnsupportedOperationException(
+                        "Only String arguments are supported in Phase 1. Actual type: " +
+                                arg.getClass().getName());
+            }
         }
 
         return builder.build();
@@ -155,10 +153,7 @@ public class NettyTransportClient implements TransportClient {
         if (response.getException() != null && !response.getException().isEmpty()) {
             return new Result(new RuntimeException(response.getException()));
         }
-        // 反序列化返回值 - 支持复杂对象类型
-        byte[] resultBytes = response.getResult().toByteArray();
-        Object value = codec.decode(resultBytes, Object.class);
-        return new Result(value);
+        return new Result(response.getResult().toStringUtf8());
     }
 
     // =============== 内部处理器 ===============
