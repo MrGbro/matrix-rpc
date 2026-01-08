@@ -5,12 +5,12 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>io.homeey</groupId>
-        <artifactId>matrix-rpc-transport</artifactId>
+        <artifactId>matrix-rpc-codec</artifactId>
         <version>${revision}</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>matrix-rpc-transport-netty</artifactId>
+    <artifactId>matrix-rpc-codec-kryo</artifactId>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
@@ -20,28 +20,12 @@
     <dependencies>
         <dependency>
             <groupId>io.homeey</groupId>
-            <artifactId>matrix-rpc-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.homeey</groupId>
-            <artifactId>matrix-rpc-transport-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.homeey</groupId>
             <artifactId>matrix-rpc-codec-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.homeey</groupId>
-            <artifactId>matrix-rpc-codec-protobuf</artifactId>
-            <version>${parent.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.homeey</groupId>
-            <artifactId>matrix-rpc-codec-kryo</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-all</artifactId>
+            <groupId>com.esotericsoftware</groupId>
+            <artifactId>kryo</artifactId>
+            <version>5.6.0</version>
         </dependency>
     </dependencies>
 </project>

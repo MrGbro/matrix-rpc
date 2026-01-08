@@ -15,6 +15,7 @@
     <modules>
         <module>matrix-rpc-codec-protobuf</module>
         <module>matrix-rpc-codec-api</module>
+        <module>matrix-rpc-codec-kryo</module>
     </modules>
 
     <properties>

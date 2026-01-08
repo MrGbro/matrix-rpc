@@ -46,7 +46,7 @@
 
         <!--project version control-->
         <maven_flatten_version>1.7.3</maven_flatten_version>
-        <revision>0.0.2</revision>
+        <revision>0.0.3</revision>
     </properties>
 
     <dependencyManagement>
@@ -75,6 +75,11 @@
             <dependency>
                 <groupId>io.homeey</groupId>
                 <artifactId>matrix-rpc-codec-api</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.homeey</groupId>
+                <artifactId>matrix-rpc-codec-kryo</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>
