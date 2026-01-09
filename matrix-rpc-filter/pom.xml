@@ -14,6 +14,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>matrix-rpc-filter-api</module>
+        <module>matrix-rpc-filter-builtin</module>
     </modules>
 
     <properties>

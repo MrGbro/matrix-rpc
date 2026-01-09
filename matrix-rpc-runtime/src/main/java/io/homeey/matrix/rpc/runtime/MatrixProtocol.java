@@ -9,6 +9,7 @@ import io.homeey.matrix.rpc.core.Invoker;
 import io.homeey.matrix.rpc.core.Protocol;
 import io.homeey.matrix.rpc.registry.api.Registry;
 import io.homeey.matrix.rpc.registry.api.RegistryFactory;
+import io.homeey.matrix.rpc.runtime.support.FilterChainBuilder;
 import io.homeey.matrix.rpc.spi.Activate;
 import io.homeey.matrix.rpc.spi.ExtensionLoader;
 import io.homeey.matrix.rpc.spi.SPI;
@@ -57,15 +58,18 @@ public class MatrixProtocol implements Protocol {
             transportServer.start(url, this::handleRequest);
         }
 
-        // 3. 注册服务
+        // 3. 为 Invoker 包装 Provider 端 Filter 链
+        Invoker<T> filteredInvoker = FilterChainBuilder.buildInvokerChain(invoker, "PROVIDER");
+
+        // 4. 注册服务
         String key = serviceKey(url, invoker.getInterface());
-        exporters.put(key, new AbstractExporter<>(invoker));
+        exporters.put(key, new AbstractExporter<>(filteredInvoker));
 
         System.out.println("[Matrix RPC] Service exported: " + key);
-        // 4. 注册到注册中心
+        // 5. 注册到注册中心
         registry.register(url);
         System.out.println("[Matrix RPC] Service registered to registry: " + url);
-        return new AbstractExporter<T>(invoker) {
+        return new AbstractExporter<T>(filteredInvoker) {
             @Override
             public void unexport() {
                 exporters.remove(key);
@@ -94,7 +98,8 @@ public class MatrixProtocol implements Protocol {
         List<URL> urls = registry.lookup(type.getName(), url.getParameter("group"), url.getParameter("version"));
         serviceUrls.put(serviceKey, urls);
 
-        return new AbstractInvoker<T>(type) {
+        // 3. 创建远程调用 Invoker
+        Invoker<T> remoteInvoker = new AbstractInvoker<T>(type) {
             @Override
             public Result invoke(Invocation invocation) throws RpcException {
                 // 1. 获取可用服务提供者
@@ -117,6 +122,9 @@ public class MatrixProtocol implements Protocol {
                 return client.send(invocation, timeout);
             }
         };
+
+        // 4. 为 Invoker 包装 Consumer 端 Filter 链
+        return FilterChainBuilder.buildInvokerChain(remoteInvoker, "CONSUMER");
     }
 
     // 处理请求的核心方法

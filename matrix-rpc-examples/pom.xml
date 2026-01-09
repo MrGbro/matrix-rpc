@@ -38,5 +38,9 @@
             <groupId>io.homeey</groupId>
             <artifactId>matrix-rpc-proxy-jdk</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.homeey</groupId>
+            <artifactId>matrix-rpc-filter-builtin</artifactId>
+        </dependency>
     </dependencies>
 </project>
