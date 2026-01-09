@@ -38,4 +38,3 @@ build/
 
 ### flattened
 *.flattened-pom.xml
-/.qoder/

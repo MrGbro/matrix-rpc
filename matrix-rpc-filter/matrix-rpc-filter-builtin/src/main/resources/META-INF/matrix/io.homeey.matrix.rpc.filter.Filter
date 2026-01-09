@@ -1,0 +1,3 @@
+accesslog=io.homeey.matrix.rpc.filter.builtin.AccessLogFilter
+exception=io.homeey.matrix.rpc.filter.builtin.ExceptionFilter
+timeout=io.homeey.matrix.rpc.filter.builtin.TimeoutFilter
