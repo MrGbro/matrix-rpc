@@ -1,6 +1,7 @@
 package io.homeey.matrix.rpc.registry.api;
 
-import io.homeey.matrix.rpc.common.URL;
+
+import io.homeey.matrix.rpc.core.URL;
 
 import java.util.List;
 

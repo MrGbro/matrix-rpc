@@ -1,4 +1,4 @@
-package io.homeey.matrix.rpc.common;
+package io.homeey.matrix.rpc.core;
 
 import java.io.Serial;
 import java.io.Serializable;

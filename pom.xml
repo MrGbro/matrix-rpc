@@ -11,7 +11,6 @@
     <name>Matrix RPC Framework</name>
     <description>A lightweight, cloud-native, distributed RPC framework</description>
     <modules>
-        <module>matrix-rpc-common</module>
         <module>matrix-rpc-bom</module>
         <module>matrix-rpc-spi</module>
         <module>matrix-rpc-core</module>
@@ -52,11 +51,6 @@
     <dependencyManagement>
         <dependencies>
             <!--project dependency-->
-            <dependency>
-                <groupId>io.homeey</groupId>
-                <artifactId>matrix-rpc-common</artifactId>
-                <version>${project.version}</version>
-            </dependency>
             <dependency>
                 <groupId>io.homeey</groupId>
                 <artifactId>matrix-rpc-spi</artifactId>

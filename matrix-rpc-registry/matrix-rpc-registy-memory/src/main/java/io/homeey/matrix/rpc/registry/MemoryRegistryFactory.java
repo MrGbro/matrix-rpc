@@ -1,6 +1,6 @@
 package io.homeey.matrix.rpc.registry;
 
-import io.homeey.matrix.rpc.common.URL;
+import io.homeey.matrix.rpc.core.URL;
 import io.homeey.matrix.rpc.registry.api.Registry;
 import io.homeey.matrix.rpc.registry.api.RegistryFactory;
 import io.homeey.matrix.rpc.spi.Activate;

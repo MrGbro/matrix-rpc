@@ -21,7 +21,7 @@
     <dependencies>
         <dependency>
             <groupId>io.homeey</groupId>
-            <artifactId>matrix-rpc-common</artifactId>
+            <artifactId>matrix-rpc-core</artifactId>
         </dependency>
         <dependency>
             <groupId>io.homeey</groupId>

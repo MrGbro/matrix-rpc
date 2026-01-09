@@ -1,6 +1,5 @@
 package io.homeey.matrix.rpc.core;
 
-import io.homeey.matrix.rpc.common.URL;
 import io.homeey.matrix.rpc.spi.SPI;
 
 @SPI("matrix") // 默认协议

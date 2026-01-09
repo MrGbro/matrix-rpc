@@ -20,15 +20,7 @@
     <dependencies>
         <dependency>
             <groupId>io.homeey</groupId>
-            <artifactId>matrix-rpc-common</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.homeey</groupId>
             <artifactId>matrix-rpc-spi</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.homeey</groupId>
-            <artifactId>matrix-rpc-register-api</artifactId>
         </dependency>
     </dependencies>
 </project>

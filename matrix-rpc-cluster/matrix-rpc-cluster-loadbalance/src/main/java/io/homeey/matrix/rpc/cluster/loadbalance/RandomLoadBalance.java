@@ -1,7 +1,7 @@
 package io.homeey.matrix.rpc.cluster.loadbalance;
 
 import io.homeey.matrix.rpc.cluster.api.LoadBalance;
-import io.homeey.matrix.rpc.common.URL;
+import io.homeey.matrix.rpc.core.URL;
 import io.homeey.matrix.rpc.core.Invocation;
 import io.homeey.matrix.rpc.spi.Activate;
 

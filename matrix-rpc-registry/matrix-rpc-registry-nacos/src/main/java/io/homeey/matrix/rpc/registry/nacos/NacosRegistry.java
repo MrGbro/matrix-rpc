@@ -4,7 +4,7 @@ import com.alibaba.nacos.api.exception.NacosException;
 import com.alibaba.nacos.api.naming.NamingFactory;
 import com.alibaba.nacos.api.naming.NamingService;
 import com.alibaba.nacos.api.naming.pojo.Instance;
-import io.homeey.matrix.rpc.common.URL;
+import io.homeey.matrix.rpc.core.URL;
 import io.homeey.matrix.rpc.registry.api.NotifyListener;
 import io.homeey.matrix.rpc.registry.api.Registry;
 

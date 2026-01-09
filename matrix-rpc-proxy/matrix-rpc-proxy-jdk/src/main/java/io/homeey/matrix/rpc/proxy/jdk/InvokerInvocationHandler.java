@@ -1,6 +1,6 @@
 package io.homeey.matrix.rpc.proxy.jdk;
 
-import io.homeey.matrix.rpc.common.Result;
+import io.homeey.matrix.rpc.core.Result;
 import io.homeey.matrix.rpc.core.Invocation;
 import io.homeey.matrix.rpc.core.Invoker;
 import io.homeey.matrix.rpc.core.SimpleInvocation;

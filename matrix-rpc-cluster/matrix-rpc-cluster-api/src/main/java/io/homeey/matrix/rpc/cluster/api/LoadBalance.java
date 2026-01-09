@@ -1,6 +1,6 @@
 package io.homeey.matrix.rpc.cluster.api;
 
-import io.homeey.matrix.rpc.common.URL;
+import io.homeey.matrix.rpc.core.URL;
 import io.homeey.matrix.rpc.core.Invocation;
 import io.homeey.matrix.rpc.spi.SPI;
 

@@ -1,8 +1,8 @@
 package io.homeey.matrix.rpc.transport.api;
 
-import io.homeey.matrix.rpc.common.Result;
-import io.homeey.matrix.rpc.common.URL;
 import io.homeey.matrix.rpc.core.Invocation;
+import io.homeey.matrix.rpc.core.Result;
+import io.homeey.matrix.rpc.core.URL;
 import io.homeey.matrix.rpc.spi.SPI;
 
 import java.io.Closeable;
