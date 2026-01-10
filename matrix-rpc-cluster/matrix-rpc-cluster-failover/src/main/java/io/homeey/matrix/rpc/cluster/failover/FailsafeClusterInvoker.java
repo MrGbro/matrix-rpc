@@ -31,7 +31,7 @@ public class FailsafeClusterInvoker<T> extends ClusterInvoker<T> {
     
     @Override
     public Result invoke(Invocation invocation) throws RpcException {
-        List<URL> providers = getProviders();
+        List<URL> providers = getProviders(invocation);
         if (providers == null || providers.isEmpty()) {
             logger.warn("[Failsafe] No provider available for service: {}, return empty result",
                     invocation.getServiceName());

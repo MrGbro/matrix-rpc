@@ -41,6 +41,8 @@ public class RpcService<T> implements Closeable {
     private String protocol = "matrix";
     private String group = "";
     private String version = "1.0.0";
+    private String tag = "";      // 服务标签（用于灰度发布、环境隔离等）
+    private int weight = 100;   // 服务权重（用于权重路由）
 
     private Exporter<T> exporter;
     private volatile boolean exported = false;
@@ -128,6 +130,29 @@ public class RpcService<T> implements Closeable {
     }
 
     /**
+     * 设置服务标签（用于灰度发布、环境隔离）
+     * 
+     * @param tag 标签名称（如 gray, beta, prod）
+     */
+    public RpcService<T> tag(String tag) {
+        this.tag = tag;
+        return this;
+    }
+
+    /**
+     * 设置服务权重（用于权重路由）
+     * 
+     * @param weight 权重值（范围 1-1000，默认 100）
+     */
+    public RpcService<T> weight(int weight) {
+        if (weight < 1 || weight > 1000) {
+            throw new IllegalArgumentException("Weight must be between 1 and 1000");
+        }
+        this.weight = weight;
+        return this;
+    }
+
+    /**
      * 暴露服务
      *
      * @return this（支持链式调用）
@@ -147,6 +172,10 @@ public class RpcService<T> implements Closeable {
                 params.put("group", group);
             }
             params.put("version", version);
+            if (tag != null && !tag.isEmpty()) {
+                params.put("tag", tag);
+            }
+            params.put("weight", String.valueOf(weight));
             URL url = new URL(protocol, host, port, interfaceClass.getName(), params);
 
             // 3. 通过 SPI 获取 Protocol 并导出

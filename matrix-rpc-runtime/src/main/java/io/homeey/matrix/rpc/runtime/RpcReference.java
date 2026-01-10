@@ -40,6 +40,8 @@ public class RpcReference<T> implements Closeable {
     private String cluster = "failover";     // 容错策略：failover/failfast/failsafe
     private int retries = 2;                 // 重试次数（仅 failover 有效）
     private boolean directConnect = false;   // 是否启用直连模式（绕过注册中心）
+    private String tag = "";                 // 请求标签（用于标签路由）
+    private boolean tagForce = false;        // 强制标签路由（不降级）
 
     private Invoker<T> invoker;  // 改为保存 Invoker，而不是 client
     private T proxy;
@@ -127,6 +129,26 @@ public class RpcReference<T> implements Closeable {
     }
 
     /**
+     * 设置请求标签（用于标签路由）
+     * 
+     * @param tag 标签名称（如 gray, beta, prod）
+     */
+    public RpcReference<T> tag(String tag) {
+        this.tag = tag;
+        return this;
+    }
+
+    /**
+     * 设置强制标签路由（不降级到无标签实例）
+     * 
+     * @param force 是否强制
+     */
+    public RpcReference<T> tagForce(boolean force) {
+        this.tagForce = force;
+        return this;
+    }
+
+    /**
      * 获取远程服务代理对象
      */
     public T get() {
@@ -141,6 +163,14 @@ public class RpcReference<T> implements Closeable {
             params.put("loadbalance", loadbalance);
             params.put("cluster", cluster);
             params.put("retries", String.valueOf(retries));
+
+            // 添加标签路由参数
+            if (tag != null && !tag.isEmpty()) {
+                params.put("tag", tag);
+                if (tagForce) {
+                    params.put("tag.force", "true");
+                }
+            }
 
             // 如果启用直连模式，添加 direct 参数
             if (directConnect) {

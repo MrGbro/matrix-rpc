@@ -126,7 +126,10 @@ public class MatrixProtocol implements Protocol {
         }
 
         // 8. 为 Invoker 包装 Consumer 端 Filter 链
-        return FilterChainBuilder.buildInvokerChain(invoker, "CONSUMER");
+        Invoker<T> filteredInvoker = FilterChainBuilder.buildInvokerChain(invoker, "CONSUMER");
+        
+        // 9. 包装 URL 参数附加器（将 tag 等参数传递到 Invocation attachments）
+        return new URLAttachmentInvoker<>(filteredInvoker, url);
     }
 
     // 处理请求的核心方法

@@ -38,3 +38,4 @@ build/
 
 ### flattened
 *.flattened-pom.xml
+/doc/

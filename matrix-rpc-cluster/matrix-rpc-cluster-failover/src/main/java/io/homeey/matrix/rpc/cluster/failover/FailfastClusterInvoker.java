@@ -10,7 +10,6 @@ import io.homeey.matrix.rpc.transport.api.TransportClient;
 
 import java.util.List;
 import java.util.concurrent.ConcurrentMap;
-import java.util.function.Supplier;
 
 /**
  * 快速失败容错策略
@@ -27,7 +26,7 @@ public class FailfastClusterInvoker<T> extends ClusterInvoker<T> {
     
     @Override
     public Result invoke(Invocation invocation) throws RpcException {
-        List<URL> providers = getProviders();
+        List<URL> providers = getProviders(invocation);
         if (providers == null || providers.isEmpty()) {
             throw new RpcException("No provider available for service: " + invocation.getServiceName());
         }

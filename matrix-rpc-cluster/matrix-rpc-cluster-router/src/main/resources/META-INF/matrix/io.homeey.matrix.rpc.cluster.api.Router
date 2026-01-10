@@ -1,0 +1,3 @@
+tag=io.homeey.matrix.rpc.cluster.router.TagRouter
+condition=io.homeey.matrix.rpc.cluster.router.ConditionRouter
+dynamic=io.homeey.matrix.rpc.cluster.router.DynamicRouter

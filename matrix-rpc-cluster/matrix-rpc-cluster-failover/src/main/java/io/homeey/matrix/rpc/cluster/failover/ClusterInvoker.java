@@ -68,8 +68,9 @@ public abstract class ClusterInvoker<T> implements Invoker<T> {
     
     /**
      * 获取当前可用的服务提供者列表
+     * 支持路由过滤：根据调用上下文（标签等）过滤服务实例
      */
-    protected List<URL> getProviders() {
-        return directory.list();
+    protected List<URL> getProviders(Invocation invocation) {
+        return directory.list(invocation);
     }
 }

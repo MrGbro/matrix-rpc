@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentMap;
-import java.util.function.Supplier;
 
 /**
  * 失败重试容错策略
@@ -32,7 +31,7 @@ public class FailoverClusterInvoker<T> extends ClusterInvoker<T> {
     
     @Override
     public Result invoke(Invocation invocation) throws RpcException {
-        List<URL> providers = getProviders();
+        List<URL> providers = getProviders(invocation);
         if (providers == null || providers.isEmpty()) {
             throw new RpcException("No provider available for service: " + invocation.getServiceName());
         }

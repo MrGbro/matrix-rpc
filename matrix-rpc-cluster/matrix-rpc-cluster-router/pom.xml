@@ -5,24 +5,26 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>io.homeey</groupId>
-        <artifactId>matrix-rpc</artifactId>
+        <artifactId>matrix-rpc-cluster</artifactId>
         <version>${revision}</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>matrix-rpc-cluster</artifactId>
-    <packaging>pom</packaging>
-    <modules>
-        <module>matrix-rpc-cluster-api</module>
-        <module>matrix-rpc-cluster-failover</module>
-        <module>matrix-rpc-cluster-loadbalance</module>
-        <module>matrix-rpc-cluster-router</module>
-    </modules>
+    <artifactId>matrix-rpc-cluster-router</artifactId>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-
+    <dependencies>
+        <dependency>
+            <groupId>io.homeey</groupId>
+            <artifactId>matrix-rpc-cluster-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.homeey</groupId>
+            <artifactId>matrix-rpc-spi</artifactId>
+        </dependency>
+    </dependencies>
 </project>
