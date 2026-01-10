@@ -1,0 +1,3 @@
+failover=io.homeey.matrix.rpc.cluster.failover.FailoverCluster
+failfast=io.homeey.matrix.rpc.cluster.failover.FailfastCluster
+failsafe=io.homeey.matrix.rpc.cluster.failover.FailsafeCluster
