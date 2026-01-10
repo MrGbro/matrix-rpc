@@ -160,9 +160,37 @@ public class NettyTransportServer implements TransportServer {
 
         @Override
         public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-            System.err.println("[Matrix RPC] Server exception: " + cause.getMessage());
-            cause.printStackTrace();
+            // 区分客户端断连（正常）和其他异常（错误）
+            if (isClientDisconnected(cause)) {
+                // 客户端断连是正常现象，打印 WARN 级别日志
+                System.out.println("[Matrix RPC] WARN: Client disconnected: " + ctx.channel().remoteAddress());
+            } else {
+                // 其他异常打印 ERROR 级别日志
+                System.err.println("[Matrix RPC] ERROR: Server exception from " + ctx.channel().remoteAddress() + ": " + cause.getMessage());
+                cause.printStackTrace();
+            }
             ctx.close();
+        }
+        
+        /**
+         * 判断是否为客户端断连异常
+         */
+        private boolean isClientDisconnected(Throwable cause) {
+            if (cause == null) {
+                return false;
+            }
+            
+            String message = cause.getMessage();
+            if (message == null) {
+                message = "";
+            }
+            
+            // 常见的客户端断连异常特征
+            return cause instanceof java.io.IOException
+                    && (message.contains("Connection reset")
+                        || message.contains("Broken pipe")
+                        || message.contains("远程主机强迫关闭了一个现有的连接")
+                        || message.contains("An existing connection was forcibly closed"));
         }
 
         private Invocation convertToInvocation(RpcProto.RpcRequest request) {

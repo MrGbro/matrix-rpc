@@ -32,6 +32,14 @@
         </dependency>
         <dependency>
             <groupId>io.homeey</groupId>
+            <artifactId>matrix-rpc-codec-kryo</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.homeey</groupId>
+            <artifactId>matrix-rpc-codec-protobuf</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.homeey</groupId>
             <artifactId>matrix-rpc-registy-memory</artifactId>
         </dependency>
         <dependency>
@@ -41,6 +49,14 @@
         <dependency>
             <groupId>io.homeey</groupId>
             <artifactId>matrix-rpc-filter-builtin</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.homeey</groupId>
+            <artifactId>matrix-rpc-cluster-loadbalance</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.homeey</groupId>
+            <artifactId>matrix-rpc-cluster-failover</artifactId>
         </dependency>
     </dependencies>
 </project>

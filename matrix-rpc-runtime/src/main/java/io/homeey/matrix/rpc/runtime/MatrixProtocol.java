@@ -1,6 +1,10 @@
 package io.homeey.matrix.rpc.runtime;
 
 import io.homeey.matrix.rpc.core.*;
+import io.homeey.matrix.rpc.cluster.api.Cluster;
+import io.homeey.matrix.rpc.cluster.api.Directory;
+import io.homeey.matrix.rpc.cluster.api.LoadBalance;
+import io.homeey.matrix.rpc.cluster.api.RegistryDirectory;
 import io.homeey.matrix.rpc.registry.api.Registry;
 import io.homeey.matrix.rpc.registry.api.RegistryFactory;
 import io.homeey.matrix.rpc.runtime.support.FilterChainBuilder;
@@ -22,7 +26,6 @@ public class MatrixProtocol implements Protocol {
     private final ConcurrentHashMap<String, Exporter<?>> exporters = new ConcurrentHashMap<>();
     private final TransportServer transportServer;
     private final AtomicBoolean initialized = new AtomicBoolean(false);
-    private URL serverUrl;
     private final Registry registry;
     private final ConcurrentMap<String, TransportClient> clients = new ConcurrentHashMap<>();
     private final ConcurrentMap<String, List<URL>> serviceUrls = new ConcurrentHashMap<>();
@@ -47,7 +50,6 @@ public class MatrixProtocol implements Protocol {
     public synchronized <T> Exporter<T> export(Invoker<T> invoker, URL url) {
         // 1. 初始化服务器（仅第一次调用时启动）
         if (initialized.compareAndSet(false, true)) {
-            this.serverUrl = url;
             // 2. 启动传输层，设置请求处理器
             transportServer.start(url, this::handleRequest);
         }
@@ -81,44 +83,50 @@ public class MatrixProtocol implements Protocol {
 
     @Override
     public <T> Invoker<T> refer(Class<T> type, URL url) {
-        // 1. 订阅服务变化
-        String serviceKey = serviceKey(url, type);
-        registry.subscribe(type.getName(), urls -> {
+        // 检测是否为直连模式（URL 参数中包含 direct=true）
+        boolean isDirect = "true".equals(url.getParameter("direct"));
+        Invoker<T> invoker = null;
+        if (isDirect) {
+            // 直连模式：绕过注册中心，直接创建 Invoker
+            System.out.println("[Matrix RPC] Direct mode enabled, connecting to: " + url.getAddress());
+            // 创建 直连的 Invoker
+            invoker = createDirectInvoker(type, url);
+        } else {
+            // 注册中心模式：原有逻辑
+            // 1. 订阅服务变化
+            String serviceKey = serviceKey(url, type);
+            registry.subscribe(type.getName(), urls -> {
+                serviceUrls.put(serviceKey, urls);
+                System.out.println("[Matrix RPC] Service updated: " + serviceKey + ", providers: " + urls.size());
+            });
+
+            // 2. 首次获取服务列表
+            List<URL> urls = registry.lookup(type.getName(), url.getParameter("group"), url.getParameter("version"));
             serviceUrls.put(serviceKey, urls);
-            System.out.println("[Matrix RPC] Service updated: " + serviceKey + ", providers: " + urls.size());
-        });
 
-        // 2. 首次获取服务列表
-        List<URL> urls = registry.lookup(type.getName(), url.getParameter("group"), url.getParameter("version"));
-        serviceUrls.put(serviceKey, urls);
+            // 3. 创建 Directory
+            Directory<T> directory = new RegistryDirectory<>(type, () -> serviceUrls.get(serviceKey));
 
-        // 3. 创建远程调用 Invoker
-        Invoker<T> remoteInvoker = new AbstractInvoker<T>(type) {
-            @Override
-            public Result invoke(Invocation invocation) throws RpcException {
-                // 1. 获取可用服务提供者
-                List<URL> providers = serviceUrls.get(serviceKey);
-                if (providers == null || providers.isEmpty()) {
-                    throw new RpcException("No provider available for service: " + serviceKey);
-                }
+            // 4. 加载负载均衡策略（通过 SPI）
+            String loadbalanceName = url.getParameter("loadbalance", "random");
+            LoadBalance loadBalance = ExtensionLoader.getExtensionLoader(LoadBalance.class)
+                    .getExtension(loadbalanceName);
+            System.out.println("[Matrix RPC] Using loadbalance: " + loadbalanceName);
 
-                // 2. 负载均衡选择 (Phase 2.2 实现)
-                URL providerUrl = selectProvider(providers, invocation);
+            // 5. 加载 Cluster（通过 SPI）
+            String clusterName = url.getParameter("cluster", "failover");
+            Cluster cluster = ExtensionLoader.getExtensionLoader(Cluster.class)
+                    .getExtension(clusterName);
+            System.out.println("[Matrix RPC] Using cluster: " + clusterName);
 
-                // 3. 获取/创建客户端
-                TransportClient client = clients.computeIfAbsent(
-                        providerUrl.getAddress(),
-                        k -> createClient(providerUrl)
-                );
+            // 6. 确保所有提供者都有客户端连接
+            ensureClients(serviceKey);
+            // 7. 创建 ClusterInvoker
+            invoker = cluster.join(directory, loadBalance, clients);
+        }
 
-                // 4. 发送请求 (带超时)
-                long timeout = 3000; // 默认3秒
-                return client.send(invocation, timeout);
-            }
-        };
-
-        // 4. 为 Invoker 包装 Consumer 端 Filter 链
-        return FilterChainBuilder.buildInvokerChain(remoteInvoker, "CONSUMER");
+        // 8. 为 Invoker 包装 Consumer 端 Filter 链
+        return FilterChainBuilder.buildInvokerChain(invoker, "CONSUMER");
     }
 
     // 处理请求的核心方法
@@ -139,6 +147,43 @@ public class MatrixProtocol implements Protocol {
         }
     }
 
+    /**
+     * 确保所有服务提供者都有客户端连接
+     */
+    private void ensureClients(String serviceKey) {
+        List<URL> providers = serviceUrls.get(serviceKey);
+        if (providers != null) {
+            for (URL provider : providers) {
+                clients.computeIfAbsent(provider.getAddress(), k -> createClient(provider));
+            }
+        }
+    }
+
+    /**
+     * 创建直连模式的 Invoker（绕过注册中心）
+     */
+    private <T> Invoker<T> createDirectInvoker(Class<T> type, URL url) {
+        // 1. 创建客户端连接
+        TransportClient client = createClient(url);
+
+        // 2. 创建简单的 Invoker
+        Invoker<T> invoker = new AbstractInvoker<T>(type) {
+            @Override
+            public Result invoke(Invocation invocation) {
+                try {
+                    // 从 URL 参数中获取超时时间，默认 3000ms
+                    long timeout = url.getParameter("timeout", 3000);
+                    return client.send(invocation, timeout);
+                } catch (Exception e) {
+                    return new Result(new RpcException("Direct invocation failed: " + e.getMessage(), e));
+                }
+            }
+        };
+
+        // 3. 包装 Filter 链
+        return FilterChainBuilder.buildInvokerChain(invoker, "CONSUMER");
+    }
+
     private TransportClient createClient(URL url) {
         // 直接创建NettyTransportClient（因为需要URL参数）
         NettyTransportClient client = new NettyTransportClient(url);
@@ -148,11 +193,6 @@ public class MatrixProtocol implements Protocol {
             throw new RuntimeException("Failed to create client for " + url, e);
         }
         return client;
-    }
-
-    private URL selectProvider(List<URL> providers, Invocation invocation) {
-        // 简化版：随机选择
-        return providers.get((int) (Math.random() * providers.size()));
     }
 
 

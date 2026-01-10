@@ -77,7 +77,14 @@ public class NettyTransportClient implements TransportClient {
     @Override
     public void connect() throws Exception {
         ChannelFuture future = bootstrap.connect(url.getHost(), url.getPort()).sync();
+        if (!future.isSuccess()) {
+            throw new RuntimeException("Failed to connect to " + url.getAddress(), future.cause());
+        }
         this.channel = future.channel();
+        // 等待 Channel 真正激活
+        if (!channel.isActive()) {
+            throw new IllegalStateException("Channel is not active after connection");
+        }
         System.out.println("[Netty] Connected to server: " + url.getHost() + ":" + url.getPort());
     }
 

@@ -42,5 +42,17 @@
             <groupId>io.homeey</groupId>
             <artifactId>matrix-rpc-register-api</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.homeey</groupId>
+            <artifactId>matrix-rpc-cluster-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.homeey</groupId>
+            <artifactId>matrix-rpc-cluster-loadbalance</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.homeey</groupId>
+            <artifactId>matrix-rpc-cluster-failover</artifactId>
+        </dependency>
     </dependencies>
 </project>

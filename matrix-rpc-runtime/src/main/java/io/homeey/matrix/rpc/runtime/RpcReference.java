@@ -1,12 +1,10 @@
 package io.homeey.matrix.rpc.runtime;
 
-import io.homeey.matrix.rpc.core.Result;
+import io.homeey.matrix.rpc.core.Protocol;
 import io.homeey.matrix.rpc.core.URL;
-import io.homeey.matrix.rpc.core.Invocation;
 import io.homeey.matrix.rpc.core.Invoker;
 import io.homeey.matrix.rpc.proxy.api.ProxyFactory;
 import io.homeey.matrix.rpc.spi.ExtensionLoader;
-import io.homeey.matrix.rpc.transport.api.TransportClient;
 
 import java.io.Closeable;
 import java.util.HashMap;
@@ -20,14 +18,14 @@ import java.util.Map;
  * // 一行代码获取远程服务代理
  * EchoService service = RpcReference.refer(EchoService.class, "localhost", 20880);
  * String result = service.echo("Hello");
- * 
+ *
  * // 或使用 Builder 模式进行更多配置
  * EchoService service = RpcReference.create(EchoService.class)
  *     .address("localhost", 20880)
  *     .timeout(5000)
  *     .get();
  * </pre>
- * 
+ *
  * @param <T> 服务接口类型
  */
 public class RpcReference<T> implements Closeable {
@@ -38,8 +36,12 @@ public class RpcReference<T> implements Closeable {
     private int timeout = 3000;
     private String protocol = "matrix";
     private String proxyType = "jdk";
-    
-    private TransportClient client;
+    private String loadbalance = "random";  // 负载均衡策略：random/roundrobin/weightedrandom/consistenthash
+    private String cluster = "failover";     // 容错策略：failover/failfast/failsafe
+    private int retries = 2;                 // 重试次数（仅 failover 有效）
+    private boolean directConnect = false;   // 是否启用直连模式（绕过注册中心）
+
+    private Invoker<T> invoker;  // 改为保存 Invoker，而不是 client
     private T proxy;
 
     private RpcReference(Class<T> interfaceClass) {
@@ -68,6 +70,7 @@ public class RpcReference<T> implements Closeable {
     public RpcReference<T> address(String host, int port) {
         this.host = host;
         this.port = port;
+        this.directConnect = true;
         return this;
     }
 
@@ -96,6 +99,34 @@ public class RpcReference<T> implements Closeable {
     }
 
     /**
+     * 设置负载均衡策略（默认 random）
+     *
+     * @param loadbalance 支持: random, roundrobin, weightedrandom, consistenthash
+     */
+    public RpcReference<T> loadbalance(String loadbalance) {
+        this.loadbalance = loadbalance;
+        return this;
+    }
+
+    /**
+     * 设置容错策略（默认 failover）
+     *
+     * @param cluster 支持: failover(失败重试), failfast(快速失败), failsafe(失败安全)
+     */
+    public RpcReference<T> cluster(String cluster) {
+        this.cluster = cluster;
+        return this;
+    }
+
+    /**
+     * 设置重试次数（仅 failover 策略有效，默认 2 次）
+     */
+    public RpcReference<T> retries(int retries) {
+        this.retries = retries;
+        return this;
+    }
+
+    /**
      * 获取远程服务代理对象
      */
     public T get() {
@@ -107,16 +138,23 @@ public class RpcReference<T> implements Closeable {
             // 1. 创建 URL
             Map<String, String> params = new HashMap<>();
             params.put("timeout", String.valueOf(timeout));
+            params.put("loadbalance", loadbalance);
+            params.put("cluster", cluster);
+            params.put("retries", String.valueOf(retries));
+
+            // 如果启用直连模式，添加 direct 参数
+            if (directConnect) {
+                params.put("direct", "true");
+            }
+
             URL url = new URL(protocol, host, port, interfaceClass.getName(), params);
 
-            // 2. 通过 SPI 获取 TransportClient 并连接
-            client = ExtensionLoader.getExtensionLoader(TransportClient.class)
-                    .getDefaultExtension();
-            client.init(url);
-            client.connect();
+            // 2. 通过 SPI 获取 Protocol
+            Protocol matrixProtocol = ExtensionLoader.getExtensionLoader(Protocol.class)
+                    .getExtension(protocol);
 
-            // 3. 创建 Invoker
-            Invoker<T> invoker = createInvoker(url);
+            // 3. 调用 Protocol.refer() 获取完整的 Invoker（含 Cluster + LoadBalance + Filter）
+            invoker = matrixProtocol.refer(interfaceClass, url);
 
             // 4. 通过 SPI 获取 ProxyFactory 创建代理
             ProxyFactory proxyFactory = ExtensionLoader.getExtensionLoader(ProxyFactory.class)
@@ -129,36 +167,12 @@ public class RpcReference<T> implements Closeable {
         }
     }
 
-    private Invoker<T> createInvoker(URL url) {
-        final TransportClient transportClient = this.client;
-        final int invokeTimeout = this.timeout;
-        
-        return new Invoker<T>() {
-            @Override
-            public Class<T> getInterface() {
-                return interfaceClass;
-            }
-
-            @Override
-            public Result invoke(Invocation invocation) {
-                return transportClient.send(invocation, invokeTimeout);
-            }
-        };
-    }
-
     /**
      * 关闭连接
      */
     @Override
     public void close() {
-        if (client != null) {
-            try {
-                client.close();
-            } catch (Exception e) {
-                // ignore
-            }
-            client = null;
-        }
+        invoker = null;
         proxy = null;
     }
 
@@ -166,6 +180,6 @@ public class RpcReference<T> implements Closeable {
      * 获取当前连接状态
      */
     public boolean isConnected() {
-        return client != null && client.isConnected();
+        return invoker != null;
     }
 }

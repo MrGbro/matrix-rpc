@@ -1,1 +1,4 @@
 random=io.homeey.matrix.rpc.cluster.loadbalance.RandomLoadBalance
+roundrobin=io.homeey.matrix.rpc.cluster.loadbalance.RoundRobinLoadBalance
+weightedrandom=io.homeey.matrix.rpc.cluster.loadbalance.WeightedRandomLoadBalance
+consistenthash=io.homeey.matrix.rpc.cluster.loadbalance.ConsistentHashLoadBalance
