@@ -6,6 +6,8 @@ import io.homeey.matrix.rpc.core.Invocation;
 import io.homeey.matrix.rpc.core.Invoker;
 import io.homeey.matrix.rpc.filter.Filter;
 import io.homeey.matrix.rpc.spi.Activate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 异常处理过滤器
@@ -23,6 +25,7 @@ import io.homeey.matrix.rpc.spi.Activate;
 @Activate(group = {"PROVIDER"}, order = 200)
 public class ExceptionFilter implements Filter {
 
+    private static final Logger logger = LoggerFactory.getLogger(ExceptionFilter.class);
     private static final String FILTER_NAME = "exception";
 
     @Override
@@ -53,7 +56,7 @@ public class ExceptionFilter implements Filter {
     }
 
     private void logException(Invocation invocation, Throwable t) {
-        System.err.printf("[ExceptionFilter] Service: %s, Method: %s, Exception: %s - %s%n",
+        logger.error("Service: {}, Method: {}, Exception: {} - {}",
                 invocation.getServiceName(),
                 invocation.methodName(),
                 t.getClass().getSimpleName(),

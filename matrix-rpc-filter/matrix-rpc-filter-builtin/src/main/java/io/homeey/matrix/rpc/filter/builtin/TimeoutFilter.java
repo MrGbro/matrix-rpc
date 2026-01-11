@@ -6,6 +6,8 @@ import io.homeey.matrix.rpc.core.Invocation;
 import io.homeey.matrix.rpc.core.Invoker;
 import io.homeey.matrix.rpc.filter.Filter;
 import io.homeey.matrix.rpc.spi.Activate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 超时检测过滤器
@@ -25,6 +27,7 @@ import io.homeey.matrix.rpc.spi.Activate;
 @Activate(group = {"CONSUMER"}, order = 100)
 public class TimeoutFilter implements Filter {
 
+    private static final Logger logger = LoggerFactory.getLogger(TimeoutFilter.class);
     private static final String FILTER_NAME = "timeout";
     private static final long DEFAULT_SLOW_THRESHOLD = 1000; // 默认1秒
 
@@ -61,7 +64,7 @@ public class TimeoutFilter implements Filter {
     }
 
     private void logSlowCall(Invocation invocation, long costTime, long threshold) {
-        System.out.printf("[TimeoutFilter] SLOW CALL - Service: %s, Method: %s, Cost: %dms (threshold: %dms)%n",
+        logger.warn("SLOW CALL - Service: {}, Method: {}, Cost: {}ms (threshold: {}ms)",
                 invocation.getServiceName(),
                 invocation.methodName(),
                 costTime,
@@ -69,7 +72,7 @@ public class TimeoutFilter implements Filter {
     }
 
     private void logTimeout(Invocation invocation, long costTime) {
-        System.err.printf("[TimeoutFilter] TIMEOUT - Service: %s, Method: %s, Cost: %dms%n",
+        logger.error("TIMEOUT - Service: {}, Method: {}, Cost: {}ms",
                 invocation.getServiceName(),
                 invocation.methodName(),
                 costTime);

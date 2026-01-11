@@ -9,6 +9,8 @@ import io.homeey.matrix.rpc.core.URL;
 import io.homeey.matrix.rpc.spi.Activate;
 import io.homeey.matrix.rpc.spi.ExtensionLoader;
 import io.homeey.matrix.rpc.transport.api.TransportClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;
@@ -27,6 +29,9 @@ import java.util.concurrent.atomic.AtomicLong;
 
 @Activate(order = 100)
 public class NettyTransportClient implements TransportClient {
+    
+    private static final Logger logger = LoggerFactory.getLogger(NettyTransportClient.class);
+    
     private URL url;
     private EventLoopGroup group;
     private Bootstrap bootstrap;
@@ -85,7 +90,7 @@ public class NettyTransportClient implements TransportClient {
         if (!channel.isActive()) {
             throw new IllegalStateException("Channel is not active after connection");
         }
-        System.out.println("[Netty] Connected to server: " + url.getHost() + ":" + url.getPort());
+        logger.info("Connected to server: {}:{}", url.getHost(), url.getPort());
     }
 
     @Override
@@ -177,13 +182,13 @@ public class NettyTransportClient implements TransportClient {
             if (future != null) {
                 future.complete(response);
             } else {
-                System.err.println("[Netty] No pending request for ID: " + response.getRequestId());
+                logger.warn("No pending request for ID: {}", response.getRequestId());
             }
         }
 
         @Override
         public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-            System.err.println("[Netty] Client exception: " + cause.getMessage());
+            logger.error("Client exception", cause);
             pendingRequests.forEach((id, future) ->
                     future.completeExceptionally(cause));
             ctx.close();

@@ -7,6 +7,8 @@ import io.homeey.matrix.rpc.core.Invocation;
 import io.homeey.matrix.rpc.core.Invoker;
 import io.homeey.matrix.rpc.core.Protocol;
 import io.homeey.matrix.rpc.spi.ExtensionLoader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
 import java.lang.reflect.Method;
@@ -32,6 +34,7 @@ import java.util.Map;
  * @param <T> 服务接口类型
  */
 public class RpcService<T> implements Closeable {
+    private static final Logger logger = LoggerFactory.getLogger(RpcService.class);
 
     private final Class<T> interfaceClass;
     private final T implementation;
@@ -229,6 +232,7 @@ public class RpcService<T> implements Closeable {
             throw new IllegalStateException("Service not exported yet. Call export() first.");
         }
 
+        // 保留控制台输出，给用户直观的反馈
         System.out.println("========================================");
         System.out.println("Service [" + interfaceClass.getSimpleName() + "] exported at port: " + port);
         System.out.println("Press Ctrl+C to stop the server...");

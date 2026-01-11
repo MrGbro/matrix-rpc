@@ -11,6 +11,8 @@ import io.homeey.matrix.rpc.spi.Activate;
 import io.homeey.matrix.rpc.spi.ExtensionLoader;
 import io.homeey.matrix.rpc.transport.api.RequestHandler;
 import io.homeey.matrix.rpc.transport.api.TransportServer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;
@@ -27,6 +29,8 @@ import java.util.stream.Collectors;
 
 @Activate(order = 100)
 public class NettyTransportServer implements TransportServer {
+
+    private static final Logger logger = LoggerFactory.getLogger(NettyTransportServer.class);
 
     private EventLoopGroup bossGroup;
     private EventLoopGroup workerGroup;
@@ -72,7 +76,7 @@ public class NettyTransportServer implements TransportServer {
 
             serverChannel = bootstrap.bind(port).sync().channel();
             started.set(true);
-            System.out.println("[Matrix RPC] Netty server started on port: " + port);
+            logger.info("Netty server started on port: {}", port);
         } catch (InterruptedException e) {
             throw new RuntimeException("Failed to start Netty server on port: " + port, e);
         }
@@ -93,7 +97,7 @@ public class NettyTransportServer implements TransportServer {
         if (bossGroup != null) {
             bossGroup.shutdownGracefully();
         }
-        System.out.println("[Matrix RPC] Netty server stopped");
+        logger.info("Netty server stopped");
     }
 
     // =============== 内部处理器 ===============
@@ -163,11 +167,10 @@ public class NettyTransportServer implements TransportServer {
             // 区分客户端断连（正常）和其他异常（错误）
             if (isClientDisconnected(cause)) {
                 // 客户端断连是正常现象，打印 WARN 级别日志
-                System.out.println("[Matrix RPC] WARN: Client disconnected: " + ctx.channel().remoteAddress());
+                logger.warn("Client disconnected: {}", ctx.channel().remoteAddress());
             } else {
                 // 其他异常打印 ERROR 级别日志
-                System.err.println("[Matrix RPC] ERROR: Server exception from " + ctx.channel().remoteAddress() + ": " + cause.getMessage());
-                cause.printStackTrace();
+                logger.error("Server exception from {}", ctx.channel().remoteAddress(), cause);
             }
             ctx.close();
         }

@@ -15,6 +15,8 @@
     <modules>
         <module>matrix-rpc-filter-api</module>
         <module>matrix-rpc-filter-builtin</module>
+        <module>matrix-rpc-filter-sentinel</module>
+        <module>matrix-rpc-filter-resilience4j</module>
     </modules>
 
     <properties>

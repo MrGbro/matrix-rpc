@@ -7,6 +7,8 @@ import com.alibaba.nacos.api.naming.pojo.Instance;
 import io.homeey.matrix.rpc.core.URL;
 import io.homeey.matrix.rpc.registry.api.NotifyListener;
 import io.homeey.matrix.rpc.registry.api.Registry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
@@ -20,6 +22,7 @@ import java.util.stream.Collectors;
  * @since 2026/01/03
  */
 public class NacosRegistry implements Registry {
+    private static final Logger logger = LoggerFactory.getLogger(NacosRegistry.class);
     private final NamingService namingService;
     private final URL registryUrl;
     private final Map<String, List<URL>> serviceCache = new ConcurrentHashMap<>();
@@ -44,8 +47,9 @@ public class NacosRegistry implements Registry {
                     getServiceName(url),
                     instance
             );
-            System.out.println("[Nacos] Service registered: " + getServiceName(url) + " -> " + url);
+            logger.info("Service registered: {} -> {}", getServiceName(url), url);
         } catch (NacosException e) {
+            logger.error("Failed to register service to Nacos: {}", url, e);
             throw new RuntimeException("Failed to register service to Nacos", e);
         }
     }
@@ -58,8 +62,9 @@ public class NacosRegistry implements Registry {
                     getServiceName(url),
                     instance
             );
-            System.out.println("[Nacos] Service unregistered: " + getServiceName(url));
+            logger.info("Service unregistered: {}", getServiceName(url));
         } catch (NacosException e) {
+            logger.error("Failed to unregister service from Nacos: {}", url, e);
             throw new RuntimeException("Failed to unregister service from Nacos", e);
         }
     }
@@ -97,7 +102,7 @@ public class NacosRegistry implements Registry {
                 }
                 Thread.sleep(5000); // 5秒轮询
             } catch (Exception e) {
-                System.err.println("[Nacos] Service change listener error: " + e.getMessage());
+                logger.error("Service change listener error", e);
             }
         }
     }

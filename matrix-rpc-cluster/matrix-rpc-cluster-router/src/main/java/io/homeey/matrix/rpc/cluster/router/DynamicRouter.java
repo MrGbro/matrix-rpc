@@ -7,6 +7,8 @@ import io.homeey.matrix.rpc.core.Invocation;
 import io.homeey.matrix.rpc.core.URL;
 import io.homeey.matrix.rpc.spi.Activate;
 import io.homeey.matrix.rpc.spi.ExtensionLoader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -36,6 +38,7 @@ import java.util.List;
  */
 @Activate(order = 15)
 public class DynamicRouter implements Router {
+    private static final Logger logger = LoggerFactory.getLogger(DynamicRouter.class);
 
     private final ConditionRouter conditionRouter = new ConditionRouter();
     private ConfigCenter configCenter;
@@ -62,9 +65,9 @@ public class DynamicRouter implements Router {
                     .getExtension(protocol);
             configCenter.init(configCenterAddress);
 
-            System.out.println("[DynamicRouter] Initialized with config center: " + configCenterAddress);
+            logger.info("DynamicRouter initialized with config center: {}", configCenterAddress);
         } catch (Exception e) {
-            System.err.println("[DynamicRouter] Failed to initialize config center: " + e.getMessage());
+            logger.error("Failed to initialize config center", e);
             configCenter = null;
         }
     }
@@ -84,7 +87,7 @@ public class DynamicRouter implements Router {
 
         // 添加监听器，规则变化时自动更新
         configCenter.addListener(serviceName, rules -> {
-            System.out.println("[DynamicRouter] Rules updated for service: " + serviceName + ", count: " + rules.size());
+            logger.info("Rules updated for service: {}, count: {}", serviceName, rules.size());
             conditionRouter.setRules(rules);
         });
     }
@@ -97,10 +100,12 @@ public class DynamicRouter implements Router {
             List<RouteRule> rules = configCenter.getRouteRules(serviceName);
             if (rules != null && !rules.isEmpty()) {
                 conditionRouter.setRules(rules);
-                System.out.println("[DynamicRouter] Loaded " + rules.size() + " rules for service: " + serviceName);
+                logger.info("Loaded {} rules for service: {}", rules.size(), serviceName);
+            } else {
+                logger.debug("No rules found for service: {}", serviceName);
             }
         } catch (Exception e) {
-            System.err.println("[DynamicRouter] Failed to load rules: " + e.getMessage());
+            logger.error("Failed to load rules for service: {}", serviceName, e);
         }
     }
 

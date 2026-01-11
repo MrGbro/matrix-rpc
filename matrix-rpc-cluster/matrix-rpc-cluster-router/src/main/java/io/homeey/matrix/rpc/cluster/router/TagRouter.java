@@ -4,6 +4,8 @@ import io.homeey.matrix.rpc.cluster.api.Router;
 import io.homeey.matrix.rpc.core.Invocation;
 import io.homeey.matrix.rpc.core.URL;
 import io.homeey.matrix.rpc.spi.Activate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.List;
@@ -40,6 +42,8 @@ import java.util.stream.Collectors;
  */
 @Activate(order = 10)
 public class TagRouter implements Router {
+
+    private static final Logger logger = LoggerFactory.getLogger(TagRouter.class);
 
     private static final String TAG_KEY = "tag";
     private static final String TAG_FORCE_KEY = "tag.force";
@@ -79,7 +83,7 @@ public class TagRouter implements Router {
         boolean force = "true".equals(invocation.getAttachments().get(TAG_FORCE_KEY));
         if (force) {
             // 强制标签路由，不降级
-            System.out.println("[TagRouter] No provider available for tag: " + requestTag + ", force mode enabled, returning empty list");
+            logger.warn("No provider available for tag: {}, force mode enabled, returning empty list", requestTag);
             return Collections.emptyList();
         }
 
@@ -89,7 +93,7 @@ public class TagRouter implements Router {
                 .collect(Collectors.toList());
 
         if (!fallbackProviders.isEmpty()) {
-            System.out.println("[TagRouter] No provider available for tag: " + requestTag + ", fallback to " + fallbackProviders.size() + " untagged providers");
+            logger.info("No provider available for tag: {}, fallback to {} untagged providers", requestTag, fallbackProviders.size());
         }
 
         return fallbackProviders;

@@ -3,6 +3,8 @@ package io.homeey.matrix.rpc.cluster.router;
 import io.homeey.matrix.rpc.cluster.api.ConfigCenter;
 import io.homeey.matrix.rpc.cluster.api.RouteRule;
 import io.homeey.matrix.rpc.spi.Activate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +38,7 @@ import java.util.function.Consumer;
  */
 @Activate
 public class MemoryConfigCenter implements ConfigCenter {
+    private static final Logger logger = LoggerFactory.getLogger(MemoryConfigCenter.class);
 
     // 存储每个服务的路由规则
     private final ConcurrentHashMap<String, List<RouteRule>> ruleStore = new ConcurrentHashMap<>();
@@ -45,7 +48,7 @@ public class MemoryConfigCenter implements ConfigCenter {
 
     @Override
     public void init(String address) {
-        System.out.println("[MemoryConfigCenter] Initialized with address: " + address);
+        logger.info("MemoryConfigCenter initialized with address: {}", address);
     }
 
     @Override
@@ -57,20 +60,20 @@ public class MemoryConfigCenter implements ConfigCenter {
     @Override
     public void addListener(String serviceName, Consumer<List<RouteRule>> listener) {
         listeners.computeIfAbsent(serviceName, k -> new CopyOnWriteArrayList<>()).add(listener);
-        System.out.println("[MemoryConfigCenter] Added listener for service: " + serviceName);
+        logger.debug("Added listener for service: {}", serviceName);
     }
 
     @Override
     public void removeListener(String serviceName) {
         listeners.remove(serviceName);
-        System.out.println("[MemoryConfigCenter] Removed listeners for service: " + serviceName);
+        logger.debug("Removed listeners for service: {}", serviceName);
     }
 
     @Override
     public void publishRouteRules(String serviceName, List<RouteRule> rules) {
         // 更新规则
         ruleStore.put(serviceName, new ArrayList<>(rules));
-        System.out.println("[MemoryConfigCenter] Published " + rules.size() + " rules for service: " + serviceName);
+        logger.info("Published {} rules for service: {}", rules.size(), serviceName);
 
         // 通知所有监听器
         List<Consumer<List<RouteRule>>> serviceListeners = listeners.get(serviceName);
@@ -79,7 +82,7 @@ public class MemoryConfigCenter implements ConfigCenter {
                 try {
                     listener.accept(new ArrayList<>(rules));
                 } catch (Exception e) {
-                    System.err.println("[MemoryConfigCenter] Failed to notify listener: " + e.getMessage());
+                    logger.warn("Failed to notify listener for service: {}", serviceName, e);
                 }
             }
         }
@@ -89,6 +92,6 @@ public class MemoryConfigCenter implements ConfigCenter {
     public void close() {
         ruleStore.clear();
         listeners.clear();
-        System.out.println("[MemoryConfigCenter] Closed");
+        logger.info("MemoryConfigCenter closed");
     }
 }

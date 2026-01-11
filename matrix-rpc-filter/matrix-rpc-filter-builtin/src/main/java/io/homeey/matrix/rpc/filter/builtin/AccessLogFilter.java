@@ -5,6 +5,8 @@ import io.homeey.matrix.rpc.core.Invocation;
 import io.homeey.matrix.rpc.core.Invoker;
 import io.homeey.matrix.rpc.filter.Filter;
 import io.homeey.matrix.rpc.spi.Activate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -28,6 +30,7 @@ import java.util.Arrays;
 @Activate(group = {"PROVIDER"}, order = 100)
 public class AccessLogFilter implements Filter {
 
+    private static final Logger logger = LoggerFactory.getLogger(AccessLogFilter.class);
     private static final String FILTER_NAME = "accesslog";
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
 
@@ -65,7 +68,7 @@ public class AccessLogFilter implements Filter {
                 "(" + String.join(", ", Arrays.stream(paramTypes).map(Class::getSimpleName).toList()) + ")";
         String status = hasError ? "FAILED" : "SUCCESS";
 
-        System.out.printf("[AccessLog] %s | %s | %s.%s%s | %dms | %s%n",
+        logger.info("{} | {} | {}.{}{} | {}ms | {}",
                 timestamp, status, serviceName, methodName, params, costTime, status);
     }
 }

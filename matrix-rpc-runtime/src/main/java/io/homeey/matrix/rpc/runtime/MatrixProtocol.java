@@ -14,6 +14,8 @@ import io.homeey.matrix.rpc.spi.SPI;
 import io.homeey.matrix.rpc.transport.api.TransportClient;
 import io.homeey.matrix.rpc.transport.api.TransportServer;
 import io.homeey.matrix.rpc.transport.netty.client.NettyTransportClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -23,6 +25,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @SPI("matrix")
 @Activate(order = 100)
 public class MatrixProtocol implements Protocol {
+    private static final Logger logger = LoggerFactory.getLogger(MatrixProtocol.class);
+    
     private final ConcurrentHashMap<String, Exporter<?>> exporters = new ConcurrentHashMap<>();
     private final TransportServer transportServer;
     private final AtomicBoolean initialized = new AtomicBoolean(false);
@@ -43,7 +47,7 @@ public class MatrixProtocol implements Protocol {
                 .getExtension(registryUrl.getProtocol());
         this.registry = registryFactory.getRegistry(registryUrl);
 
-        System.out.println("[Matrix RPC] Using registry: " + registryAddress);
+        logger.info("Using registry: {}", registryAddress);
     }
 
     @Override
@@ -61,10 +65,10 @@ public class MatrixProtocol implements Protocol {
         String key = serviceKey(url, invoker.getInterface());
         exporters.put(key, new AbstractExporter<>(filteredInvoker));
 
-        System.out.println("[Matrix RPC] Service exported: " + key);
+        logger.info("Service exported: {}", key);
         // 5. 注册到注册中心
         registry.register(url);
-        System.out.println("[Matrix RPC] Service registered to registry: " + url);
+        logger.info("Service registered to registry: {}", url);
         return new AbstractExporter<T>(filteredInvoker) {
             @Override
             public void unexport() {
@@ -73,7 +77,7 @@ public class MatrixProtocol implements Protocol {
                     try {
                         transportServer.close();
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        logger.error("Failed to close transport server", e);
                     }
                     initialized.set(false);
                 }
@@ -88,7 +92,7 @@ public class MatrixProtocol implements Protocol {
         Invoker<T> invoker = null;
         if (isDirect) {
             // 直连模式：绕过注册中心，直接创建 Invoker
-            System.out.println("[Matrix RPC] Direct mode enabled, connecting to: " + url.getAddress());
+            logger.info("Direct mode enabled, connecting to: {}", url.getAddress());
             // 创建 直连的 Invoker
             invoker = createDirectInvoker(type, url);
         } else {
@@ -97,7 +101,7 @@ public class MatrixProtocol implements Protocol {
             String serviceKey = serviceKey(url, type);
             registry.subscribe(type.getName(), urls -> {
                 serviceUrls.put(serviceKey, urls);
-                System.out.println("[Matrix RPC] Service updated: " + serviceKey + ", providers: " + urls.size());
+                logger.debug("Service updated: {}, providers: {}", serviceKey, urls.size());
             });
 
             // 2. 首次获取服务列表
@@ -111,13 +115,13 @@ public class MatrixProtocol implements Protocol {
             String loadbalanceName = url.getParameter("loadbalance", "random");
             LoadBalance loadBalance = ExtensionLoader.getExtensionLoader(LoadBalance.class)
                     .getExtension(loadbalanceName);
-            System.out.println("[Matrix RPC] Using loadbalance: " + loadbalanceName);
+            logger.debug("Using loadbalance: {}", loadbalanceName);
 
             // 5. 加载 Cluster（通过 SPI）
             String clusterName = url.getParameter("cluster", "failover");
             Cluster cluster = ExtensionLoader.getExtensionLoader(Cluster.class)
                     .getExtension(clusterName);
-            System.out.println("[Matrix RPC] Using cluster: " + clusterName);
+            logger.debug("Using cluster: {}", clusterName);
 
             // 6. 确保所有提供者都有客户端连接
             ensureClients(serviceKey);
@@ -193,6 +197,7 @@ public class MatrixProtocol implements Protocol {
         try {
             client.connect();
         } catch (Exception e) {
+            logger.error("Failed to create client for {}", url, e);
             throw new RuntimeException("Failed to create client for " + url, e);
         }
         return client;

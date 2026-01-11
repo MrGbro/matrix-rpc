@@ -1,0 +1,2 @@
+sentinel.ratelimiter=io.homeey.matrix.rpc.filter.sentinel.SentinelRateLimiterFilter
+sentinel.circuitbreaker=io.homeey.matrix.rpc.filter.sentinel.SentinelCircuitBreakerFilter

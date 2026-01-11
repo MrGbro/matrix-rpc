@@ -1,0 +1,2 @@
+resilience4j.ratelimiter=io.homeey.matrix.rpc.filter.resilience4j.Resilience4jRateLimiterFilter
+resilience4j.circuitbreaker=io.homeey.matrix.rpc.filter.resilience4j.Resilience4jCircuitBreakerFilter
