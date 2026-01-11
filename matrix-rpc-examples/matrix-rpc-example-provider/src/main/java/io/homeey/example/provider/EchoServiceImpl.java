@@ -1,7 +1,8 @@
 package io.homeey.example.provider;
 
-import io.homeey.matrix.rpc.example.api.EchoService;
-import io.homeey.matrix.rpc.example.api.User;
+
+import io.homeey.example.api.EchoService;
+import io.homeey.example.api.User;
 
 import java.util.concurrent.atomic.AtomicInteger;
 

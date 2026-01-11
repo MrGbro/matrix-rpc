@@ -1,6 +1,6 @@
 package io.homeey.example.provider;
 
-import io.homeey.matrix.rpc.example.api.EchoService;
+import io.homeey.example.api.EchoService;
 import io.homeey.matrix.rpc.runtime.RpcService;
 
 public class ProviderMain {
