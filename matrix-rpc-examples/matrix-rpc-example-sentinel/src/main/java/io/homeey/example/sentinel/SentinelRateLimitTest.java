@@ -1,4 +1,4 @@
-package io.homeey.example.consumer;
+package io.homeey.example.sentinel;
 
 import io.homeey.example.api.EchoService;
 import io.homeey.matrix.rpc.runtime.RpcReference;
@@ -11,7 +11,7 @@ import io.homeey.matrix.rpc.runtime.RpcReference;
  * 2. 超限调用 (QPS > 10, 触发限流)
  * 
  * <p>运行方式:
- * 1. 先启动 ProviderMain
+ * 1. 先启动 matrix-rpc-example-provider 模块的 ProviderMain
  * 2. 再启动本测试类
  * 
  * @author Matrix RPC Team

@@ -42,6 +42,9 @@ public class RpcReference<T> implements Closeable {
     private boolean directConnect = false;   // 是否启用直连模式（绕过注册中心）
     private String tag = "";                 // 请求标签（用于标签路由）
     private boolean tagForce = false;        // 强制标签路由（不降级）
+    private boolean async = false;           // 是否启用异步调用
+    private boolean generic = false;         // 是否为泛化调用
+    private String serviceName = "";         // 泛化调用时的服务名称
 
     private Invoker<T> invoker;  // 改为保存 Invoker，而不是 client
     private T proxy;
@@ -147,6 +150,32 @@ public class RpcReference<T> implements Closeable {
         this.tagForce = force;
         return this;
     }
+    
+    /**
+     * 启用异步调用模式
+     * 
+     * <p>启用后，所有调用将以异步方式执行，需要通过 AsyncContext 获取 CompletableFuture
+     * 
+     * @return this
+     */
+    public RpcReference<T> async() {
+        this.async = true;
+        return this;
+    }
+    
+    /**
+     * 启用泛化调用模式
+     * 
+     * <p>泛化调用无需服务接口定义，适用于测试平台、网关等场景
+     * 
+     * @param serviceName 服务名称（全限定类名）
+     * @return this
+     */
+    public RpcReference<T> generic(String serviceName) {
+        this.generic = true;
+        this.serviceName = serviceName;
+        return this;
+    }
 
     /**
      * 获取远程服务代理对象
@@ -176,6 +205,17 @@ public class RpcReference<T> implements Closeable {
             if (directConnect) {
                 params.put("direct", "true");
             }
+            
+            // 如果启用异步调用，添加 async 参数
+            if (async) {
+                params.put("async", "true");
+            }
+            
+            // 如果是泛化调用，添加 generic 参数
+            if (generic && serviceName != null && !serviceName.isEmpty()) {
+                params.put("generic", "true");
+                params.put("serviceName", serviceName);
+            }
 
             URL url = new URL(protocol, host, port, interfaceClass.getName(), params);
 
@@ -185,6 +225,11 @@ public class RpcReference<T> implements Closeable {
 
             // 3. 调用 Protocol.refer() 获取完整的 Invoker（含 Cluster + LoadBalance + Filter）
             invoker = matrixProtocol.refer(interfaceClass, url);
+            
+            // 3.5. 如果启用异步，用 AsyncInvokerWrapper 包装
+            if (async) {
+                invoker = new AsyncInvokerWrapper<>(invoker);
+            }
 
             // 4. 通过 SPI 获取 ProxyFactory 创建代理
             ProxyFactory proxyFactory = ExtensionLoader.getExtensionLoader(ProxyFactory.class)

@@ -9,6 +9,8 @@ import io.homeey.matrix.rpc.core.URL;
 import io.homeey.matrix.rpc.spi.Activate;
 import io.homeey.matrix.rpc.spi.ExtensionLoader;
 import io.homeey.matrix.rpc.transport.api.TransportClient;
+import io.homeey.matrix.rpc.transport.netty.client.pool.ConnectionPool;
+import io.homeey.matrix.rpc.transport.netty.client.pool.SimpleConnectionPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import io.netty.bootstrap.Bootstrap;
@@ -35,7 +37,7 @@ public class NettyTransportClient implements TransportClient {
     private URL url;
     private EventLoopGroup group;
     private Bootstrap bootstrap;
-    private Channel channel;
+    private ConnectionPool connectionPool; // 替换单个 Channel 为连接池
     private final ConcurrentHashMap<Long, CompletableFuture<RpcProto.RpcResponse>> pendingRequests
             = new ConcurrentHashMap<>();
     private final AtomicLong requestIdGenerator = new AtomicLong(0);
@@ -77,31 +79,31 @@ public class NettyTransportClient implements TransportClient {
                         pipeline.addLast(new RpcClientHandler());
                     }
                 });
+        
+        // 创建连接池（从 URL 参数读取连接池大小，默认为1）
+        int poolSize = url.getParameter("connectionPoolSize", 1);
+        this.connectionPool = new SimpleConnectionPool(bootstrap, url, poolSize);
     }
 
     @Override
     public void connect() throws Exception {
-        ChannelFuture future = bootstrap.connect(url.getHost(), url.getPort()).sync();
-        if (!future.isSuccess()) {
-            throw new RuntimeException("Failed to connect to " + url.getAddress(), future.cause());
-        }
-        this.channel = future.channel();
-        // 等待 Channel 真正激活
-        if (!channel.isActive()) {
-            throw new IllegalStateException("Channel is not active after connection");
-        }
-        logger.info("Connected to server: {}:{}", url.getHost(), url.getPort());
+        // 连接池在创建时会自动初始化连接，无需额外操作
+        logger.info("Connection pool initialized for server: {}:{}", url.getHost(), url.getPort());
     }
 
     @Override
     public boolean isConnected() {
-        return channel != null && channel.isActive();
+        return connectionPool != null && connectionPool.getStats().getTotalConnections() > 0;
     }
 
     @Override
     public void close() {
-        if (channel != null) {
-            channel.close();
+        if (connectionPool != null) {
+            try {
+                connectionPool.close();
+            } catch (Exception e) {
+                logger.warn("Failed to close connection pool", e);
+            }
         }
         group.shutdownGracefully();
         pendingRequests.forEach((id, future) ->
@@ -110,25 +112,29 @@ public class NettyTransportClient implements TransportClient {
 
     @Override
     public Result send(Invocation invocation, long timeoutMillis) {
+        Channel channel = null;
         try {
-            // 1. 生成唯一请求ID
+            // 1. 从连接池获取连接
+            channel = connectionPool.acquire(timeoutMillis);
+            
+            // 2. 生成唯一请求ID
             long requestId = requestIdGenerator.incrementAndGet();
 
-            // 2. 创建CompletableFuture等待响应
+            // 3. 创建CompletableFuture等待响应
             CompletableFuture<RpcProto.RpcResponse> future = new CompletableFuture<>();
             pendingRequests.put(requestId, future);
 
             try {
-                // 3. 构建请求
+                // 4. 构建请求
                 RpcProto.RpcRequest request = buildRequest(invocation, requestId);
 
-                // 4. 发送请求
-                if (channel == null || !channel.isActive()) {
+                // 5. 发送请求
+                if (!channel.isActive()) {
                     throw new IllegalStateException("Connection is not active");
                 }
                 channel.writeAndFlush(request).sync();
 
-                // 5. 等待响应 (带超时)
+                // 6. 等待响应 (带超时)
                 RpcProto.RpcResponse response = future.get(timeoutMillis, TimeUnit.MILLISECONDS);
                 return buildResult(response);
             } finally {
@@ -139,6 +145,11 @@ public class NettyTransportClient implements TransportClient {
                 throw new RuntimeException("Request timeout after " + timeoutMillis + "ms", e);
             }
             throw new RuntimeException("Failed to send RPC request", e);
+        } finally {
+            // 7. 释放连接回池
+            if (channel != null) {
+                connectionPool.release(channel);
+            }
         }
     }
 

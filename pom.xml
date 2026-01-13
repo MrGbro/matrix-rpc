@@ -49,7 +49,7 @@
 
         <!--project version control-->
         <maven_flatten_version>1.7.3</maven_flatten_version>
-        <revision>0.0.6</revision>
+        <revision>0.0.7</revision>
     </properties> 
 
     <dependencyManagement>

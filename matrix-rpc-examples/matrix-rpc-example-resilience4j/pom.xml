@@ -10,14 +10,25 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>matrix-rpc-example-consumer</artifactId>
+    <artifactId>matrix-rpc-example-resilience4j</artifactId>
+    <name>Matrix RPC Example - Resilience4j</name>
+    <description>Resilience4j治理能力演示与测试</description>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+
     <dependencies>
+        <!-- API -->
+        <dependency>
+            <groupId>io.homeey</groupId>
+            <artifactId>matrix-rpc-example-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- RPC核心 -->
         <dependency>
             <groupId>io.homeey</groupId>
             <artifactId>matrix-rpc-core</artifactId>
@@ -36,10 +47,6 @@
         </dependency>
         <dependency>
             <groupId>io.homeey</groupId>
-            <artifactId>matrix-rpc-codec-protobuf</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.homeey</groupId>
             <artifactId>matrix-rpc-registy-memory</artifactId>
         </dependency>
         <dependency>
@@ -52,22 +59,31 @@
         </dependency>
         <dependency>
             <groupId>io.homeey</groupId>
-            <artifactId>matrix-rpc-cluster-loadbalance</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.homeey</groupId>
             <artifactId>matrix-rpc-cluster-failover</artifactId>
         </dependency>
-        <!-- 日志实现 -->
+
+        <!-- 治理框架 (仅Resilience4j) -->
+        <dependency>
+            <groupId>io.homeey</groupId>
+            <artifactId>matrix-rpc-filter-resilience4j</artifactId>
+        </dependency>
+
+        <!-- 日志 -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
             <scope>runtime</scope>
         </dependency>
-        <dependency>
-            <groupId>io.homeey</groupId>
-            <artifactId>matrix-rpc-example-api</artifactId>
-            <version>${parent.version}</version>
-        </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <!-- Maven Exec插件，方便运行测试 -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.1.0</version>
+            </plugin>
+        </plugins>
+    </build>
 </project>

@@ -1,4 +1,4 @@
-package io.homeey.example.consumer;
+package io.homeey.example.resilience4j;
 
 import io.homeey.example.api.EchoService;
 import io.homeey.matrix.rpc.runtime.RpcReference;
@@ -10,13 +10,11 @@ import io.homeey.matrix.rpc.runtime.RpcReference;
  * 1. 正常调用 (QPS < 10)
  * 2. 超限调用 (QPS > 10, 触发限流)
  *
- * <p>注意: 需要先禁用Sentinel,只测试Resilience4j
- * 启动参数: -Dmatrix.filter.sentinel.ratelimiter.enabled=false
+ * <p>注意: 由于已独立模块,无需禁用Sentinel (已隔离)
  *
  * <p>运行方式:
- * 1. 先启动 ProviderMain
- * 2. 启动时添加JVM参数: -Dmatrix.filter.sentinel.ratelimiter.enabled=false
- * 3. 再启动本测试类 (同样添加参数)
+ * 1. 先启动 matrix-rpc-example-provider 模块的 ProviderMain
+ * 2. 再启动本测试类
  *
  * @author Matrix RPC Team
  * @since 2026-01-11
