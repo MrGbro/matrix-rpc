@@ -1,0 +1,1 @@
+default=io.homeey.matrix.rpc.observability.async.DefaultAsyncReporter

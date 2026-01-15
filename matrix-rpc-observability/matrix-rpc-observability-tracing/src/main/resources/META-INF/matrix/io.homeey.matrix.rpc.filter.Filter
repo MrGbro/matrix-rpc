@@ -1,0 +1,1 @@
+opentelemetry=io.homeey.matrix.rpc.observability.tracing.OpenTelemetryFilter

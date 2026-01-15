@@ -22,6 +22,7 @@
         <module>matrix-rpc-filter</module>
         <module>matrix-rpc-runtime</module>
         <module>matrix-rpc-proxy</module>
+        <module>matrix-rpc-observability</module>
     </modules>
 
     <properties>
@@ -148,6 +149,28 @@
             <dependency>
                 <groupId>io.homeey</groupId>
                 <artifactId>matrix-rpc-filter-resilience4j</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            
+            <!-- Observability Dependencies -->
+            <dependency>
+                <groupId>io.homeey</groupId>
+                <artifactId>matrix-rpc-observability-api</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.homeey</groupId>
+                <artifactId>matrix-rpc-observability-async</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.homeey</groupId>
+                <artifactId>matrix-rpc-observability-micrometer</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.homeey</groupId>
+                <artifactId>matrix-rpc-observability-tracing</artifactId>
                 <version>${revision}</version>
             </dependency>
             

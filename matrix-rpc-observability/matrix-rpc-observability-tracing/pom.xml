@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>io.homeey</groupId>
+        <artifactId>matrix-rpc-observability</artifactId>
+        <version>${revision}</version>
+    </parent>
+
+    <artifactId>matrix-rpc-observability-tracing</artifactId>
+    <packaging>jar</packaging>
+    <name>matrix-rpc-observability-tracing</name>
+    <description>Matrix RPC Observability OpenTelemetry Tracing Integration</description>
+
+    <properties>
+        <opentelemetry.version>1.34.1</opentelemetry.version>
+    </properties>
+
+    <dependencies>
+        <!-- Matrix RPC Dependencies -->
+        <dependency>
+            <groupId>io.homeey</groupId>
+            <artifactId>matrix-rpc-observability-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.homeey</groupId>
+            <artifactId>matrix-rpc-observability-async</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.homeey</groupId>
+            <artifactId>matrix-rpc-filter-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.homeey</groupId>
+            <artifactId>matrix-rpc-core</artifactId>
+        </dependency>
+
+        <!-- OpenTelemetry Dependencies -->
+        <dependency>
+            <groupId>io.opentelemetry</groupId>
+            <artifactId>opentelemetry-api</artifactId>
+            <version>${opentelemetry.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.opentelemetry</groupId>
+            <artifactId>opentelemetry-sdk</artifactId>
+            <version>${opentelemetry.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.opentelemetry</groupId>
+            <artifactId>opentelemetry-sdk-trace</artifactId>
+            <version>${opentelemetry.version}</version>
+        </dependency>
+
+        <!-- Logging -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+
+        <!-- Test Dependencies -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.opentelemetry</groupId>
+            <artifactId>opentelemetry-exporter-logging</artifactId>
+            <version>${opentelemetry.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.0.0-M5</version>
+            </plugin>
+        </plugins>
+    </build>
+</project>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>io.homeey</groupId>
+        <artifactId>matrix-rpc</artifactId>
+        <version>${revision}</version>
+    </parent>
+
+    <artifactId>matrix-rpc-observability</artifactId>
+    <packaging>pom</packaging>
+    <name>matrix-rpc-observability</name>
+    <description>Matrix RPC Observability</description>
+
+    <modules>
+        <module>matrix-rpc-observability-api</module>
+        <module>matrix-rpc-observability-async</module>
+        <module>matrix-rpc-observability-micrometer</module>
+        <module>matrix-rpc-observability-tracing</module>
+    </modules>
+</project>
