@@ -1,0 +1,1 @@
+kubernetes=io.homeey.matrix.rpc.registry.kubernetes.KubernetesRegistryFactory

@@ -23,6 +23,7 @@
         <module>matrix-rpc-runtime</module>
         <module>matrix-rpc-proxy</module>
         <module>matrix-rpc-observability</module>
+        <module>matrix-rpc-cloud-native</module>
     </modules>
 
     <properties>
@@ -47,6 +48,11 @@
         <!-- Governance Framework -->
         <sentinel.version>1.8.8</sentinel.version>
         <resilience4j.version>2.2.0</resilience4j.version>
+        
+        <!-- Cloud Native -->
+        <kubernetes-client.version>6.9.2</kubernetes-client.version>
+        <etcd.version>0.7.5</etcd.version>
+        <jackson.version>2.15.3</jackson.version>
 
         <!--project version control-->
         <maven_flatten_version>1.7.3</maven_flatten_version>
@@ -173,6 +179,48 @@
                 <artifactId>matrix-rpc-observability-tracing</artifactId>
                 <version>${revision}</version>
             </dependency>
+            <dependency>
+                <groupId>io.homeey</groupId>
+                <artifactId>matrix-rpc-observability-logging</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            
+            <!-- Cloud Native Dependencies -->
+            <dependency>
+                <groupId>io.homeey</groupId>
+                <artifactId>matrix-rpc-registry-kubernetes</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.homeey</groupId>
+                <artifactId>matrix-rpc-mesh-adapter</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.homeey</groupId>
+                <artifactId>matrix-rpc-config-center</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.homeey</groupId>
+                <artifactId>matrix-rpc-environment</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            
+            <!-- Kubernetes Java Client -->
+            <dependency>
+                <groupId>io.fabric8</groupId>
+                <artifactId>kubernetes-client</artifactId>
+                <version>${kubernetes-client.version}</version>
+            </dependency>
+            
+            <!-- etcd Client (optional) -->
+            <dependency>
+                <groupId>io.etcd</groupId>
+                <artifactId>jetcd-core</artifactId>
+                <version>${etcd.version}</version>
+                <optional>true</optional>
+            </dependency>
             
             <!-- Sentinel Dependencies -->
             <dependency>
@@ -227,6 +275,13 @@
                 <groupId>com.alibaba.fastjson2</groupId>
                 <artifactId>fastjson2</artifactId>
                 <version>${fastjson2.version}</version>
+            </dependency>
+            
+            <!-- Jackson Dependencies -->
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>${jackson.version}</version>
             </dependency>
 
             <dependency>

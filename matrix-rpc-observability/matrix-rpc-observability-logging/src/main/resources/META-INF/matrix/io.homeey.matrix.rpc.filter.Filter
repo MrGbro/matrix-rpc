@@ -1,0 +1,1 @@
+logging=io.homeey.matrix.rpc.observability.logging.LoggingFilter

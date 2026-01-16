@@ -39,6 +39,19 @@ public class MicrometerFilter implements Filter {
     // 初始化锁
     private static final Object INIT_LOCK = new Object();
 
+    // 是否启用（默认启用）
+    private static volatile boolean enabled = true;
+
+    /**
+     * 设置是否启用 Metrics 收集（应用启动时调用）
+     *
+     * @param enabled 是否启用
+     */
+    public static void setEnabled(boolean enabled) {
+        MicrometerFilter.enabled = enabled;
+        logger.info("MicrometerFilter enabled: {}", enabled);
+    }
+
     /**
      * 设置全局 MeterRegistry（应用启动时调用）
      * <p>
@@ -107,6 +120,11 @@ public class MicrometerFilter implements Filter {
 
     @Override
     public Result invoke(Invoker<?> invoker, Invocation invocation) {
+        // 快速路径：如果未启用，直接跳过
+        if (!enabled) {
+            return invoker.invoke(invocation);
+        }
+
         long startTime = System.currentTimeMillis();
         Result result = null;
         Throwable exception = null;
