@@ -24,6 +24,7 @@
         <module>matrix-rpc-proxy</module>
         <module>matrix-rpc-observability</module>
         <module>matrix-rpc-cloud-native</module>
+        <module>matrix-rpc-protocol</module>
     </modules>
 
     <properties>
@@ -56,7 +57,7 @@
 
         <!--project version control-->
         <maven_flatten_version>1.7.3</maven_flatten_version>
-        <revision>0.0.7</revision>
+        <revision>0.0.8</revision>
     </properties> 
 
     <dependencyManagement>

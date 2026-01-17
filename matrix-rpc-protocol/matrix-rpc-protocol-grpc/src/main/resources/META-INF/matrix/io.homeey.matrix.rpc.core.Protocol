@@ -1,0 +1,1 @@
+grpc=io.homeey.matrix.rpc.protocol.grpc.GrpcProtocol

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>io.homeey</groupId>
+        <artifactId>matrix-rpc-protocol</artifactId>
+        <version>${revision}</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>matrix-rpc-protocol-http2</artifactId>
+    <packaging>jar</packaging>
+    <name>matrix-rpc-protocol-http2</name>
+    <description>HTTP/2 Protocol Implementation</description>
+
+    <dependencies>
+        <!-- Matrix RPC Core -->
+        <dependency>
+            <groupId>io.homeey</groupId>
+            <artifactId>matrix-rpc-core</artifactId>
+        </dependency>
+
+        <!-- Matrix RPC SPI -->
+        <dependency>
+            <groupId>io.homeey</groupId>
+            <artifactId>matrix-rpc-spi</artifactId>
+        </dependency>
+
+        <!-- Matrix RPC Codec API -->
+        <dependency>
+            <groupId>io.homeey</groupId>
+            <artifactId>matrix-rpc-codec-api</artifactId>
+        </dependency>
+
+        <!-- Netty HTTP/2 Codec -->
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-codec-http2</artifactId>
+            <version>4.1.100.Final</version>
+        </dependency>
+
+        <!-- Netty Handler (for SSL) -->
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-handler</artifactId>
+            <version>4.1.100.Final</version>
+        </dependency>
+
+        <!-- Netty Transport -->
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-transport</artifactId>
+            <version>4.1.100.Final</version>
+        </dependency>
+
+        <!-- SLF4J API -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+    </dependencies>
+</project>

@@ -16,6 +16,8 @@
         <module>matrix-rpc-example-api</module>
         <module>matrix-rpc-example-provider</module>
         <module>matrix-rpc-example-consumer</module>
+        <module>matrix-rpc-example-http2</module>
+        <module>matrix-rpc-example-grpc</module>
         <module>matrix-rpc-example-sentinel</module>
         <module>matrix-rpc-example-resilience4j</module>
     </modules>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>io.homeey</groupId>
+        <artifactId>matrix-rpc</artifactId>
+        <version>${revision}</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>matrix-rpc-protocol</artifactId>
+    <packaging>pom</packaging>
+    <name>Matrix RPC Protocol</name>
+    <description>Protocol Layer (Matrix/HTTP2/gRPC)</description>
+
+    <modules>
+        <module>matrix-rpc-protocol-http2</module>
+        <module>matrix-rpc-protocol-grpc</module>
+    </modules>
+</project>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>io.homeey</groupId>
+        <artifactId>matrix-rpc-examples</artifactId>
+        <version>${revision}</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>matrix-rpc-example-grpc</artifactId>
+    <name>matrix-rpc-example-grpc</name>
+    <description>gRPC Protocol Examples and Tests</description>
+
+    <dependencies>
+        <!-- Example API -->
+        <dependency>
+            <groupId>io.homeey</groupId>
+            <artifactId>matrix-rpc-example-api</artifactId>
+            <version>${parent.version}</version>
+        </dependency>
+
+        <!-- gRPC Protocol -->
+        <dependency>
+            <groupId>io.homeey</groupId>
+            <artifactId>matrix-rpc-protocol-grpc</artifactId>
+            <version>${parent.version}</version>
+        </dependency>
+    </dependencies>
+</project>
