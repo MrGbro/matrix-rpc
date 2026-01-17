@@ -1,0 +1,1 @@
+zookeeper=io.homeey.matrix.rpc.registry.zookeeper.ZookeeperRegistryFactory

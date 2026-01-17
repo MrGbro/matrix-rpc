@@ -1,0 +1,2 @@
+# CGLIB 轻量级代理实现
+cglib=io.homeey.matrix.rpc.proxy.cglib.CglibProxyFactory

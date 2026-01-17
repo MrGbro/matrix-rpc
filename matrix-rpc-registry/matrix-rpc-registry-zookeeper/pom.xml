@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    
+    <parent>
+        <groupId>io.homeey</groupId>
+        <artifactId>matrix-rpc-registry</artifactId>
+        <version>${revision}</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+    
+    <artifactId>matrix-rpc-registry-zookeeper</artifactId>
+    <name>Matrix RPC Registry - Zookeeper</name>
+    <description>Zookeeper registry implementation for Matrix RPC</description>
+    
+    <properties>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <curator.version>5.5.0</curator.version>
+    </properties>
+    
+    <dependencies>
+        <!-- Matrix RPC API -->
+        <dependency>
+            <groupId>io.homeey</groupId>
+            <artifactId>matrix-rpc-register-api</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>io.homeey</groupId>
+            <artifactId>matrix-rpc-core</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>io.homeey</groupId>
+            <artifactId>matrix-rpc-spi</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        
+        <!-- Zookeeper 客户端 (Curator) -->
+        <dependency>
+            <groupId>org.apache.curator</groupId>
+            <artifactId>curator-framework</artifactId>
+            <version>${curator.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.apache.curator</groupId>
+            <artifactId>curator-recipes</artifactId>
+            <version>${curator.version}</version>
+        </dependency>
+        
+        <!-- 日志 -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        
+        <!-- 测试 -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+</project>

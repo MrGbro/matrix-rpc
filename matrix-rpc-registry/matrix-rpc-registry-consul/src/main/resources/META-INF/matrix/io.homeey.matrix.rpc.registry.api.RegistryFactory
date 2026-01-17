@@ -1,0 +1,2 @@
+# Consul 注册中心实现
+consul=io.homeey.matrix.rpc.registry.consul.ConsulRegistryFactory

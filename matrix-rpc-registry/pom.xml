@@ -16,6 +16,9 @@
         <module>matrix-rpc-register-api</module>
         <module>matrix-rpc-registry-nacos</module>
         <module>matrix-rpc-registy-memory</module>
+        <module>matrix-rpc-registry-consul</module>
+        <module>matrix-rpc-registry-zookeeper</module>
+        <module>matrix-rpc-registry-etcd</module>
     </modules>
 
     <properties>

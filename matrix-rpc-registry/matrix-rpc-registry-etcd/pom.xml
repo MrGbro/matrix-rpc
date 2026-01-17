@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>io.homeey</groupId>
+        <artifactId>matrix-rpc-registry</artifactId>
+        <version>${revision}</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>matrix-rpc-registry-etcd</artifactId>
+    <name>Matrix RPC Registry - Etcd</name>
+    <description>Etcd 注册中心实现，支持 Lease 心跳和 Watch 机制</description>
+
+    <dependencies>
+        <!-- Matrix RPC Registry API -->
+        <dependency>
+            <groupId>io.homeey</groupId>
+            <artifactId>matrix-rpc-register-api</artifactId>
+            <version>${revision}</version>
+        </dependency>
+
+        <!-- Matrix RPC Core -->
+        <dependency>
+            <groupId>io.homeey</groupId>
+            <artifactId>matrix-rpc-core</artifactId>
+            <version>${revision}</version>
+        </dependency>
+
+        <!-- Matrix RPC SPI -->
+        <dependency>
+            <groupId>io.homeey</groupId>
+            <artifactId>matrix-rpc-spi</artifactId>
+            <version>${revision}</version>
+        </dependency>
+
+        <!-- Etcd Client (Jetcd) -->
+        <dependency>
+            <groupId>io.etcd</groupId>
+            <artifactId>jetcd-core</artifactId>
+            <version>0.7.5</version>
+        </dependency>
+    </dependencies>
+
+    <properties>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+</project>
