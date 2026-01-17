@@ -1,0 +1,2 @@
+# ByteBuddy 高性能代理实现
+bytebuddy=io.homeey.matrix.rpc.proxy.bytebuddy.ByteBuddyProxyFactory

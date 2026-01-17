@@ -45,11 +45,11 @@
 
         <junit.version>5.14.1</junit.version>
         <mockito.version>5.8.0</mockito.version>
-        
+
         <!-- Governance Framework -->
         <sentinel.version>1.8.8</sentinel.version>
         <resilience4j.version>2.2.0</resilience4j.version>
-        
+
         <!-- Cloud Native -->
         <kubernetes-client.version>6.9.2</kubernetes-client.version>
         <etcd.version>0.7.5</etcd.version>
@@ -58,7 +58,7 @@
         <!--project version control-->
         <maven_flatten_version>1.7.3</maven_flatten_version>
         <revision>0.0.8</revision>
-    </properties> 
+    </properties>
 
     <dependencyManagement>
         <dependencies>
@@ -158,7 +158,7 @@
                 <artifactId>matrix-rpc-filter-resilience4j</artifactId>
                 <version>${revision}</version>
             </dependency>
-            
+
             <!-- Observability Dependencies -->
             <dependency>
                 <groupId>io.homeey</groupId>
@@ -185,7 +185,7 @@
                 <artifactId>matrix-rpc-observability-logging</artifactId>
                 <version>${revision}</version>
             </dependency>
-            
+
             <!-- Cloud Native Dependencies -->
             <dependency>
                 <groupId>io.homeey</groupId>
@@ -207,14 +207,14 @@
                 <artifactId>matrix-rpc-environment</artifactId>
                 <version>${revision}</version>
             </dependency>
-            
+
             <!-- Kubernetes Java Client -->
             <dependency>
                 <groupId>io.fabric8</groupId>
                 <artifactId>kubernetes-client</artifactId>
                 <version>${kubernetes-client.version}</version>
             </dependency>
-            
+
             <!-- etcd Client (optional) -->
             <dependency>
                 <groupId>io.etcd</groupId>
@@ -222,14 +222,14 @@
                 <version>${etcd.version}</version>
                 <optional>true</optional>
             </dependency>
-            
+
             <!-- Sentinel Dependencies -->
             <dependency>
                 <groupId>com.alibaba.csp</groupId>
                 <artifactId>sentinel-core</artifactId>
                 <version>${sentinel.version}</version>
             </dependency>
-            
+
             <!-- Resilience4j Dependencies -->
             <dependency>
                 <groupId>io.github.resilience4j</groupId>
@@ -241,7 +241,7 @@
                 <artifactId>resilience4j-ratelimiter</artifactId>
                 <version>${resilience4j.version}</version>
             </dependency>
-            
+
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-all</artifactId>
@@ -277,7 +277,7 @@
                 <artifactId>fastjson2</artifactId>
                 <version>${fastjson2.version}</version>
             </dependency>
-            
+
             <!-- Jackson Dependencies -->
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
@@ -313,6 +313,11 @@
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.0.0-M5</version>
+            </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>flatten-maven-plugin</artifactId>
